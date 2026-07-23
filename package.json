@@ -2,15 +2,18 @@
   "name": "quiz-app",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.8.1",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "test": "vitest run",
+    "test": "turbo run test",
     "test:watch": "vitest",
-    "typecheck": "tsc -b --noEmit"
+    "typecheck": "turbo run typecheck",
+    "build": "turbo run build"
   },
   "devDependencies": {
+    "turbo": "^2.10.6",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   }
