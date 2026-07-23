@@ -1,4 +1,4 @@
-import { attempts as coreAttempts } from "@quiz/core";
+import { attempts as coreAttempts } from "@quiz/core/schema";
 import { account as authAccount, session as authSession, user as authUser, verification as authVerification } from "@quiz/auth";
 import { describe, expect, it } from "vitest";
 import * as schema from "./schema";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deriveSetId } from "./derive-set-id";
+import { deriveSetId } from "./derive-set-id.ts";
 
 describe("deriveSetId", () => {
   it("フラットなファイルはファイル名(拡張子なし)をsetIdにする", () => {

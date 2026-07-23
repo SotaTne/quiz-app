@@ -1,5 +1,5 @@
-import type { Store } from "../store";
-import { parseSubmitAnswerInput } from "./parse-submit-answer-input";
+import type { Store } from "../store.ts";
+import { parseSubmitAnswerInput } from "./parse-submit-answer-input.ts";
 
 /**
  * `createAuth()`が返すインスタンスのうち、ここで必要な部分だけの最小構造型。
@@ -9,6 +9,8 @@ export type AuthLike = {
   api: {
     getSession(input: { headers: Headers }): Promise<{ user: { id: string } } | null>;
   };
+  /** better-auth自身のHTTPルート(/sign-in/social, /sign-out等)を処理する。ルーティング側で丸ごとマウントする。 */
+  handler(request: Request): Promise<Response>;
 };
 
 export type SubmitAnswerDeps = {

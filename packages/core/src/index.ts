@@ -1,40 +1,40 @@
-export type { Question, QuestionSet } from "./domain/question";
-export type { Attempt, Mode } from "./domain/attempt";
+// クライアントバンドルに含めて安全なものだけをここに置く(node:fs/node:pathやdrizzle-ormに
+// 触れるコードは絶対に含めない)。サーバー専用のデータ取得/永続化は"@quiz/core/server"へ。
+// これを混ぜると、routeファイルが「ページ本体」と「サーバー専用のloader」を同じimport文で
+// 取り込んだ際に、バンドラがクライアント向けバンドルへもnode:fs等を巻き込んでクラッシュする
+// (実際にブラウザで踏んだ不具合: derive-set-id.tsのnode:pathアクセスがクライアントで例外)。
 
-export { buildQuestionSet } from "./content/build-question-set";
-export type { BuildQuestionSetResult } from "./content/build-question-set";
+export type { Question, QuestionSet } from "./domain/question.ts";
+export type { Attempt, Mode } from "./domain/attempt.ts";
 
-export { deriveSetId } from "./content/derive-set-id";
+// quizContentPlugin(vite設定の読み込み時にしか使わない、node:fs/node:pathに触れる)は
+// ここには置かない。vite.config.tsからは"@quiz/core/vite-plugin"を直接importすること。
 
-export { loadQuestionSets } from "./content/load-question-sets";
-export type { LoadQuestionSetsResult } from "./content/load-question-sets";
+export { generateDistractors } from "./distractors/generate-distractors.ts";
 
-export { quizContentPlugin } from "./vite-plugin";
-export type { QuizContentPluginOptions, QuizContentVitePlugin } from "./vite-plugin";
+export { applyFilter } from "./filters/apply-filter.ts";
+export type { FilterType } from "./filters/apply-filter.ts";
 
-export { generateDistractors } from "./distractors/generate-distractors";
+export { checkAnswer } from "./grading/check-answer.ts";
 
-export { applyFilter } from "./filters/apply-filter";
-export type { FilterType } from "./filters/apply-filter";
+export { SetListView } from "./pages/set-list-view.tsx";
+export type { SetListViewProps, SetSummary } from "./pages/set-list-view.tsx";
 
-export { checkAnswer } from "./grading/check-answer";
+export { FlashcardView } from "./pages/flashcard-view.tsx";
+export type { FlashcardViewProps } from "./pages/flashcard-view.tsx";
 
-export { attempts } from "./schema";
+export { FourChoiceView } from "./pages/four-choice-view.tsx";
+export type { FourChoiceViewProps } from "./pages/four-choice-view.tsx";
 
-export { createStore } from "./store";
-export type { Database, RecordAttemptInput, Store } from "./store";
+export { RootLayout } from "./pages/root-layout.tsx";
+export { LoginButton } from "./pages/login-button.tsx";
+export { LogoutButton } from "./pages/logout-button.tsx";
 
-export { SetListView } from "./pages/set-list-view";
-export type { SetListViewProps, SetSummary } from "./pages/set-list-view";
+export { QuizSession } from "./pages/quiz-session.tsx";
+export type { QuizSessionProps } from "./pages/quiz-session.tsx";
 
-export { FlashcardView } from "./pages/flashcard-view";
-export type { FlashcardViewProps } from "./pages/flashcard-view";
+export { HomePage } from "./pages/home-page.tsx";
+export type { HomePageProps } from "./pages/home-page.tsx";
 
-export { FourChoiceView } from "./pages/four-choice-view";
-export type { FourChoiceViewProps } from "./pages/four-choice-view";
-
-export { submitAnswer } from "./actions/submit-answer";
-export type { AuthLike, SubmitAnswerDeps } from "./actions/submit-answer";
-
-export { parseSubmitAnswerInput } from "./actions/parse-submit-answer-input";
-export type { ParseSubmitAnswerInputResult, SubmitAnswerInput } from "./actions/parse-submit-answer-input";
+export { SetPage } from "./pages/set-page.tsx";
+export type { SetPageProps } from "./pages/set-page.tsx";

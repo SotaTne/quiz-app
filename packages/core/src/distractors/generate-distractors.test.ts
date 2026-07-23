@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Question, QuestionSet } from "../domain/question";
-import { generateDistractors } from "./generate-distractors";
+import type { Question, QuestionSet } from "../domain/question.ts";
+import { generateDistractors } from "./generate-distractors.ts";
 
 function q(id: string, answer: string): Question {
   return { id, question: `question ${id}`, answer, explanation: null };

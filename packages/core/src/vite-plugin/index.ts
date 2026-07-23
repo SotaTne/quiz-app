@@ -1,4 +1,4 @@
-import { loadQuestionSets } from "../content/load-question-sets";
+import { loadQuestionSets } from "../content/load-question-sets.ts";
 
 const VIRTUAL_MODULE_ID = "virtual:quiz-content";
 const RESOLVED_VIRTUAL_MODULE_ID = `\0${VIRTUAL_MODULE_ID}`;

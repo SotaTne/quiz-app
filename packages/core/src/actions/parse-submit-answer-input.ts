@@ -1,4 +1,4 @@
-import type { Mode } from "../domain/attempt";
+import type { Mode } from "../domain/attempt.ts";
 
 export type SubmitAnswerInput = {
   id: string;

@@ -1,19 +1,22 @@
 import { describe, expect, it, vi } from "vitest";
-import type { Store } from "../store";
-import { submitAnswer } from "./submit-answer";
+import type { Store } from "../store.ts";
+import type { AuthLike } from "./submit-answer.ts";
+import { submitAnswer } from "./submit-answer.ts";
 
 function makeStore(): Store {
   return {
     recordAttempt: vi.fn().mockResolvedValue(undefined),
     listLatestAttempts: vi.fn().mockResolvedValue(new Map()),
+    listAccuracy: vi.fn().mockResolvedValue(new Map()),
   };
 }
 
-function makeAuth(userId: string | null) {
+function makeAuth(userId: string | null): AuthLike {
   return {
     api: {
       getSession: vi.fn().mockResolvedValue(userId ? { user: { id: userId } } : null),
     },
+    handler: vi.fn(),
   };
 }
 

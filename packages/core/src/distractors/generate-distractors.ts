@@ -1,4 +1,4 @@
-import type { Question, QuestionSet } from "../domain/question";
+import type { Question, QuestionSet } from "../domain/question.ts";
 
 const normalize = (answer: string) => answer.trim().toLowerCase();
 

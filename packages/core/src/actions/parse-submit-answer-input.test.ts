@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseSubmitAnswerInput } from "./parse-submit-answer-input";
+import { parseSubmitAnswerInput } from "./parse-submit-answer-input.ts";
 
 const valid = { id: "a1", questionId: "q1", mode: "quiz", isCorrect: true };
 

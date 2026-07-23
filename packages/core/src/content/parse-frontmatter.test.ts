@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseFrontmatter } from "./parse-frontmatter";
+import { parseFrontmatter } from "./parse-frontmatter.ts";
 
 describe("parseFrontmatter", () => {
   it("先頭の---ブロックをkey/valueに分割し、残りをbodyとして返す", () => {

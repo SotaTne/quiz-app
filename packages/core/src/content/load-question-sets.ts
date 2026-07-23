@@ -1,8 +1,8 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import type { QuestionSet } from "../domain/question";
-import { buildQuestionSet } from "./build-question-set";
-import { deriveSetId } from "./derive-set-id";
+import type { QuestionSet } from "../domain/question.ts";
+import { buildQuestionSet } from "./build-question-set.ts";
+import { deriveSetId } from "./derive-set-id.ts";
 
 export type LoadQuestionSetsResult = { ok: true; data: QuestionSet[] } | { ok: false; errors: string[] };
 

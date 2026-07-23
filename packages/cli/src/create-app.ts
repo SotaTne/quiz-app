@@ -32,6 +32,10 @@ function setPackageName(dir: string, appName: string): void {
 
 function replaceWranglerPlaceholder(dir: string, appName: string): void {
   const wranglerPath = join(dir, "wrangler.toml");
-  const content = readFileSync(wranglerPath, "utf-8").replaceAll("{{appName}}", appName);
+  const content = readFileSync(wranglerPath, "utf-8")
+    .replaceAll("{{appName}}", appName)
+    // テンプレート単体でも`wrangler`の名前バリデーションを通すため、topレベルのnameは
+    // ダミー値("quiz-app-template")で持っている。ここで実際のアプリ名に差し替える。
+    .replace(/^name = ".*"$/m, `name = "${appName}"`);
   writeFileSync(wranglerPath, content);
 }

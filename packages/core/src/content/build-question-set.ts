@@ -1,6 +1,6 @@
-import type { Question, QuestionSet } from "../domain/question";
-import { parseFrontmatter } from "./parse-frontmatter";
-import { parseTable } from "./parse-table";
+import type { Question, QuestionSet } from "../domain/question.ts";
+import { parseFrontmatter } from "./parse-frontmatter.ts";
+import { parseTable } from "./parse-table.ts";
 
 export type BuildQuestionSetResult =
   | { ok: true; data: QuestionSet }

@@ -1,7 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import type { BaseSQLiteDatabase } from "drizzle-orm/sqlite-core";
-import type { Mode } from "./domain/attempt";
-import { attempts } from "./schema";
+import type { Mode } from "./domain/attempt.ts";
+import { attempts } from "./schema.ts";
 
 /**
  * ドライバに依存しない型。`drizzle-orm/d1`(本番、Cloudflare D1)と
@@ -17,11 +17,15 @@ export type RecordAttemptInput = {
   isCorrect: boolean;
 };
 
+export type QuestionAccuracy = { total: number; correct: number };
+
 export type Store = {
   /** `id`で冪等(INSERT OR IGNORE) — 再送しても安全。 */
   recordAttempt(input: RecordAttemptInput): Promise<void>;
   /** questionIdごとに1件: そのuser+modeにおける最新の回答(同時刻はidの降順でタイブレーク)。 */
   listLatestAttempts(userId: string, mode: Mode): Promise<Map<string, { isCorrect: boolean }>>;
+  /** questionIdごとに1件: そのuser+modeにおける全履歴の正答率(苦手問題判定に使う)。 */
+  listAccuracy(userId: string, mode: Mode): Promise<Map<string, QuestionAccuracy>>;
 };
 
 export function createStore(db: Database): Store {
@@ -47,6 +51,23 @@ export function createStore(db: Database): Store {
         }
       }
       return latestByQuestion;
+    },
+
+    async listAccuracy(userId, mode) {
+      const rows = await db
+        .select()
+        .from(attempts)
+        .where(and(eq(attempts.userId, userId), eq(attempts.mode, mode)));
+
+      const accuracyByQuestion = new Map<string, QuestionAccuracy>();
+      for (const row of rows) {
+        const current = accuracyByQuestion.get(row.questionId) ?? { total: 0, correct: 0 };
+        accuracyByQuestion.set(row.questionId, {
+          total: current.total + 1,
+          correct: current.correct + (row.isCorrect ? 1 : 0),
+        });
+      }
+      return accuracyByQuestion;
     },
   };
 }

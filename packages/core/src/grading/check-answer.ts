@@ -1,4 +1,4 @@
-import type { Question } from "../domain/question";
+import type { Question } from "../domain/question.ts";
 
 const normalize = (value: string) => value.trim().toLowerCase();
 

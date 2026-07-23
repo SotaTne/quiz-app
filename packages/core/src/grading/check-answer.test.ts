@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Question } from "../domain/question";
-import { checkAnswer } from "./check-answer";
+import type { Question } from "../domain/question.ts";
+import { checkAnswer } from "./check-answer.ts";
 
 const question: Question = { id: "q1", question: "1+1?", answer: "2", explanation: null };
 

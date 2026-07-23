@@ -1,4 +1,5 @@
-import type { QuestionSet } from "../domain/question";
+import { Badge, Card, Group, Progress, Stack, Text } from "@mantine/core";
+import type { QuestionSet } from "../domain/question.ts";
 
 export type SetSummary = {
   set: QuestionSet;
@@ -17,18 +18,35 @@ export type SetListViewProps = {
  */
 export function SetListView({ sets }: SetListViewProps) {
   if (sets.length === 0) {
-    return <p>まだセットがありません。content/questions/にMarkdownファイルを追加してください。</p>;
+    return <Text c="dimmed">まだセットがありません。content/questions/にMarkdownファイルを追加してください。</Text>;
   }
 
   return (
-    <ul>
+    <Stack gap="sm">
       {sets.map(({ set, masteryPercent }) => (
-        <li key={set.id}>
-          <a href={`/sets/${set.id}`}>{set.title}</a>
-          <span>{set.questions.length}問</span>
-          <span>{masteryPercent === null ? "未着手" : `${masteryPercent}%`}</span>
-        </li>
+        <Card key={set.id} component="a" href={`/sets/${set.id}`} withBorder radius="md" padding="md">
+          <Group justify="space-between" wrap="nowrap">
+            <div>
+              <Text fw={600}>{set.title}</Text>
+              <Text size="sm" c="dimmed">
+                {set.questions.length}問
+              </Text>
+            </div>
+            {masteryPercent === null ? (
+              <Badge color="gray" variant="light">
+                未着手
+              </Badge>
+            ) : (
+              <Group gap={8} wrap="nowrap">
+                <Progress value={masteryPercent} w={60} size="sm" radius="xl" />
+                <Text size="sm" c="dimmed">
+                  {masteryPercent}%
+                </Text>
+              </Group>
+            )}
+          </Group>
+        </Card>
       ))}
-    </ul>
+    </Stack>
   );
 }

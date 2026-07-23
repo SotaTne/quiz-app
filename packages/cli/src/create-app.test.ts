@@ -21,7 +21,8 @@ describe("createApp", () => {
     createApp(target, "my-app");
 
     expect(existsSync(join(target, "package.json"))).toBe(true);
-    expect(existsSync(join(target, "waku.config.ts"))).toBe(true);
+    expect(existsSync(join(target, "vite.config.ts"))).toBe(true);
+    expect(existsSync(join(target, "app/routes.ts"))).toBe(true);
     expect(existsSync(join(target, "wrangler.toml"))).toBe(true);
     expect(existsSync(join(target, "content/questions/example.md"))).toBe(true);
   });

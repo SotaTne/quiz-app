@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildQuestionSet } from "./build-question-set";
+import { buildQuestionSet } from "./build-question-set.ts";
 
 const valid = `---
 title: JavaScript基礎

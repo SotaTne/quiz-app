@@ -1,8 +1,8 @@
 import BetterSqlite3 from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { attempts } from "./schema";
-import { createStore, type Database, type Store } from "./store";
+import { attempts } from "./schema.ts";
+import { createStore, type Database, type Store } from "./store.ts";
 
 // schema.tsの`attempts`テーブルを模したもの。仮想Cloudflare Workerではなく
 // better-sqlite3を使うのは、D1と同じSQLite方言でwrangler/Miniflareのセットアップが不要かつ
@@ -90,5 +90,33 @@ describe("createStore", () => {
 
     expect((await store.listLatestAttempts("u1", "quiz")).get("q1")).toEqual({ isCorrect: true });
     expect((await store.listLatestAttempts("u2", "quiz")).get("q1")).toEqual({ isCorrect: false });
+  });
+
+  describe("listAccuracy", () => {
+    it("全履歴から正答数/総回答数を集計する(苦手問題判定に使う)", async () => {
+      await store.recordAttempt({ id: "a1", userId: "u1", questionId: "q1", mode: "quiz", isCorrect: false });
+      await store.recordAttempt({ id: "a2", userId: "u1", questionId: "q1", mode: "quiz", isCorrect: false });
+      await store.recordAttempt({ id: "a3", userId: "u1", questionId: "q1", mode: "quiz", isCorrect: true });
+
+      const accuracy = await store.listAccuracy("u1", "quiz");
+
+      expect(accuracy.get("q1")).toEqual({ total: 3, correct: 1 });
+    });
+
+    it("同じ問題でもquizとflashcardの履歴は別々に集計する", async () => {
+      await store.recordAttempt({ id: "a1", userId: "u1", questionId: "q1", mode: "quiz", isCorrect: true });
+      await store.recordAttempt({ id: "a2", userId: "u1", questionId: "q1", mode: "flashcard", isCorrect: false });
+
+      expect((await store.listAccuracy("u1", "quiz")).get("q1")).toEqual({ total: 1, correct: 1 });
+      expect((await store.listAccuracy("u1", "flashcard")).get("q1")).toEqual({ total: 1, correct: 0 });
+    });
+
+    it("一度も回答していない問題はエントリを持たない", async () => {
+      await store.recordAttempt({ id: "a1", userId: "u1", questionId: "q1", mode: "quiz", isCorrect: true });
+
+      const accuracy = await store.listAccuracy("u1", "quiz");
+
+      expect(accuracy.has("q2")).toBe(false);
+    });
   });
 });

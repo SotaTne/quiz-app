@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseTable } from "./parse-table";
+import { parseTable } from "./parse-table.ts";
 
 describe("parseTable", () => {
   it("markdownテーブルをヘッダー名をキーにした行オブジェクトに変換する", () => {
