@@ -8,12 +8,15 @@
     "dev": "react-router dev --port 3000",
     "build": "react-router build",
     "start": "vite preview --port 3000",
-    "deploy": "pnpm build && wrangler deploy",
+    "deploy": "pnpm build && pnpm db:migrate:remote && wrangler deploy && pnpm cleanup:remote",
     "typegen": "react-router typegen",
     "cf-typegen": "wrangler types",
     "typecheck": "pnpm typegen && tsc --noEmit",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "wrangler d1 migrations apply DB --local"
+    "db:migrate": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "cleanup": "node scripts/cleanup-orphaned-attempts.ts",
+    "cleanup:remote": "node scripts/cleanup-orphaned-attempts.ts --remote"
   },
   "dependencies": {
     "@mantine/core": "9.4.2",
