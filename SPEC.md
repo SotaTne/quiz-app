@@ -2,6 +2,8 @@
 
 想定用途: テスト前の一夜漬け・詰め込み学習。間隔反復(長期記憶定着)ではなく、直近で「間違えた問題を優先的に出す」ことが目的。
 
+使用バージョン: `waku@1.0.0-beta.7`(vite 8, react/react-dom/react-server-dom-webpack ~19.2.4)。
+
 ## 1. コンセプト
 
 **「設定ファイル + Markdownを置くだけでクイズアプリになるフレームワーク」を作る。**
@@ -200,10 +202,8 @@ import { quizContentPlugin } from "@quiz/core";
 import { defineConfig } from "waku/config";
 
 export default defineConfig({
-  unstable_viteConfigs: {
-    common: () => ({
-      plugins: [quizContentPlugin({ contentDir: "./content/questions" })],
-    }),
+  vite: {
+    plugins: [quizContentPlugin({ contentDir: "./content/questions" })],
   },
 });
 ```
