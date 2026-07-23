@@ -2,7 +2,7 @@
 
 想定用途: テスト前の一夜漬け・詰め込み学習。間隔反復(長期記憶定着)ではなく、直近で「間違えた問題を優先的に出す」ことが目的。
 
-使用バージョン: `waku@1.0.0-beta.7`(vite 8, react/react-dom/react-server-dom-webpack ~19.2.4)。
+使用バージョン: `waku@1.0.0-beta.7`(vite 8, react/react-dom/react-server-dom-webpack ~19.2.4)。Cloudflareへのデプロイには`@cloudflare/vite-plugin`(dev/buildの実行をworkerdランタイム上で行う)と`wrangler@4`系が必要(公式ガイド: https://waku.gg/guides/cloudflare)。
 
 ## 1. コンセプト
 
@@ -194,27 +194,57 @@ export function createStore(db: DrizzleD1Database<typeof schema>): Store { /* ..
 
 ## 7. `app`側に必要なもの（最小限）
 
-`quiz.config.ts`のような単一の設定ファイルは持たない。ビルド時の関心(`contentDir`)と実行時の関心(`db`/`auth`)を分けて、それぞれ必要な場所で直接組み立てる。
+`quiz.config.ts`のような単一の設定ファイルは持たない。ビルド時の関心(`contentDir`・Cloudflare向けビルド設定)と実行時の関心(`db`/`auth`)を分けて、それぞれ必要な場所で直接組み立てる。実際にビルド・検証して初めて分かった制約がいくつかあるため、それも含めて記す。
 
 ```ts
-// waku.config.ts — ビルド時。Vite pluginをそのまま登録するだけ
+// waku.config.ts — 公式ガイド(https://waku.gg/guides/cloudflare)準拠
+import { cloudflare } from "@cloudflare/vite-plugin";
 import { quizContentPlugin } from "@quiz/core";
 import { defineConfig } from "waku/config";
 
 export default defineConfig({
   vite: {
-    plugins: [quizContentPlugin({ contentDir: "./content/questions" })],
+    environments: {
+      rsc: {
+        optimizeDeps: { include: ["hono/tiny"] },
+        build: {
+          rolldownOptions: { platform: "neutral", external: ["cloudflare:workers"] },
+        },
+      },
+      ssr: {
+        optimizeDeps: { include: ["waku > rsc-html-stream/server"] },
+        build: { rolldownOptions: { platform: "neutral" } },
+      },
+    },
+    plugins: [
+      quizContentPlugin({ contentDir: "./content/questions" }),
+      cloudflare({ viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] }, inspectorPort: false }),
+    ],
   },
 });
 ```
 
-```ts
-// 例: Server Action側。実行時、リクエストのenvからdb/authをその都度組み立てる
-import { createStore } from "@quiz/core";
+```tsx
+// src/waku.server.tsx — waku標準のentriesファイル。API route登録とCloudflare envアクセスの実例
 import { createAuth } from "@quiz/auth";
+import { createStore, submitAnswer } from "@quiz/core";
 import { createDb } from "@quiz/db";
+import adapter from "waku/adapters/cloudflare";
+import { createPages } from "waku/router/server";
 
-function getQuizContext(env: Env) {
+type CloudflareEnv = {
+  DB: D1Database;
+  BETTER_AUTH_SECRET: string;
+  BETTER_AUTH_URL: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+};
+
+// D1のようなバインディング(オブジェクト)はwaku標準のgetEnv()では取得できない
+// (文字列のenv varsしか通さない実装のため)。`cloudflare:workers`のenvを直接使う。
+// ただし動的import必須(下の「実装上の注意」参照)。
+async function getQuizContext() {
+  const { env } = (await import("cloudflare:workers")) as unknown as { env: CloudflareEnv };
   const db = createDb(env.DB);
   return {
     store: createStore(db),
@@ -227,16 +257,36 @@ function getQuizContext(env: Env) {
     }),
   };
 }
+
+const pages = createPages(async ({ createApi }) => {
+  createApi({
+    path: "/api/submit-answer",
+    render: "dynamic",
+    handlers: {
+      POST: async (request) => {
+        const { store, auth } = await getQuizContext();
+        return submitAnswer(request, { store, auth });
+      },
+    },
+  });
+  return [];
+});
+
+// createPages()の戻り値はCloudflareアダプタでラップして初めて.build/.fetchを持つ
+// 実際のエントリになる(ラップし忘れると内部ビルドで"build is not a function"になる)。
+export default adapter(pages);
 ```
 
+**実装上の注意(実際にビルドして踏んだ制約)**:
+- `cloudflare:workers`は**モジュールのトップレベルでstatic importしない**。`@cloudflare/vite-plugin`はdev/build中のリクエスト処理をworkerd上で実行してくれるが、ビルド後の静的生成(SSG)ステップはビルド成果物を素のNodeで読み込むため、トップレベルimportだとその時点で解決できずクラッシュする(`ERR_UNSUPPORTED_ESM_URL_SCHEME`)。リクエストハンドラ内で動的importする。
+- `waku.config.ts`の`vite.environments.rsc.build.rolldownOptions.external`に`"cloudflare:workers"`を明示しないと、そもそもバンドル時に解決エラーになる。
+- `src/waku.server.tsx`のデフォルトエクスポートは`createPages(...)`の戻り値をそのまま使わず、`waku/adapters/cloudflare`の`adapter()`でラップする。
+
 - `content/questions/**/*.md`
-- `waku.config.ts`(Vite pluginの登録)
+- `waku.config.ts`(上記)
+- `src/waku.server.tsx`(上記。`quiz create`のテンプレートに含まれる)
 - `wrangler.toml`（D1バインディング定義）
 - マイグレーション適用(`pnpm db:migrate`)を**手動で**実行する（自動化しない。8章参照）
-
-### 今後決めること: Server Action層の配線
-
-- `submitAnswer(request, { store, auth })`自体は実装済み(`core`)。`getQuizContext`相当のヘルパー(リクエストの`env`から`store`/`auth`を組み立てる部分)をどこに置くか(`core`が提供するか、appが自分で書くか)は、実際にwakuの`createApi`でルートを登録する際に決める。現時点ではCloudflare Workersの`env`アクセスパターン(waku側でのbindings受け渡し方法)が未確定のため保留。
 
 ## 8. CI/CD
 

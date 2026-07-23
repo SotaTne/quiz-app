@@ -19,10 +19,11 @@
     "waku": "1.0.0-beta.7"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.46.0",
     "@cloudflare/workers-types": "^5.20260723.1",
     "@types/node": "24",
     "esbuild": "^0.27.0",
     "typescript": "^7.0.0",
-    "wrangler": "^3.99.0"
+    "wrangler": "^4.113.0"
   }
 }
