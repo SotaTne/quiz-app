@@ -32,3 +32,9 @@ export type { FlashcardViewProps } from "./pages/flashcard-view";
 
 export { FourChoiceView } from "./pages/four-choice-view";
 export type { FourChoiceViewProps } from "./pages/four-choice-view";
+
+export { submitAnswer } from "./actions/submit-answer";
+export type { AuthLike, SubmitAnswerDeps } from "./actions/submit-answer";
+
+export { parseSubmitAnswerInput } from "./actions/parse-submit-answer-input";
+export type { ParseSubmitAnswerInputResult, SubmitAnswerInput } from "./actions/parse-submit-answer-input";

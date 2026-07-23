@@ -30,9 +30,9 @@ quiz-app/
         distractors/           # 4択の誤答生成ロジック
         filters/                # 出題フィルタ (全問 / 苦手問題のみ)
         pages/                 # プレゼンテーション用コンポーネント: SetListView(Server)/FlashcardView・FourChoiceView(Client)
-                                 # データ取得(virtual:quiz-content読み込み・習熟度集計)やwaku createPagesでの実際のルート登録は
-                                 # まだ実装していない(actions/submitAnswerが揃ってから配線する。9章参照)
-        actions/                # waku Server Action: submitAnswer（1問ごと即時、authに直接依存）
+                                 # データ取得(virtual:quiz-content読み込み・習熟度集計)やwaku createPagesでの実際のルート登録はまだ
+        actions/                # submitAnswer(request, { store, auth }): Response。waku createApi等から呼び出す想定
+                                 # authはcreateAuth()の戻り値をそのまま渡せる(AuthLikeという最小構造型で受ける)
         schema.ts               # 公開Drizzleスキーマ (attempts)
         store.ts                 # スキーマに対応するStore実装 (createStore)
     db/                       # core.attempts + better-authスキーマを束ねた、D1向けのマイグレーション/接続管理（自分用）
@@ -120,7 +120,7 @@ SRS(間隔反復・Ankiのようなease factor/due date管理)は今回の用途
 やりたいことは「サーバー側での厳密な正誤判定」ではなく、**(a)正誤の永続化**と**(b)途中離脱からの再開**の2つ。したがって4択もフラッシュカードも同じ経路に統一する。バッチ化(一定間隔でまとめて送信)は行わず、シンプルに**1問ごとの即時送信**にする。
 
 1. 回答するたびに、クライアント側で`isCorrect`を計算し、`id`(`crypto.randomUUID()`などクライアント生成)・`questionId`・`mode`・`isCorrect`を`fetch(url, { keepalive: true })`で即座に送信する。`keepalive: true`により、画面遷移・タブを閉じる際でもリクエストの送信が継続される。
-2. サーバー側(`core`が提供するServer Action `submitAnswer`)は`userId`をセッションから取得し(coreが直接依存する`auth`経由)、`Store.recordAttempt`を呼ぶ。
+2. サーバー側(`core`が提供する`submitAnswer(request, { store, auth })`)は`auth.api.getSession({ headers })`で`userId`をセッションから取得し(coreが直接依存する`auth`経由)、リクエストボディを`parseSubmitAnswerInput()`で検証したうえで`Store.recordAttempt`を呼ぶ。未ログインは401、ボディのJSON不正は400、必須フィールド不正は422を返す。
 3. `Store.recordAttempt`は`id`を主キーとして`INSERT OR IGNORE`する（同じ`id`のリクエストが2回届いても2重に記録されない、冪等な書き込み）。
 4. 送信失敗時の扱いはHTTPステータスで分類する。**ネットワーク到達不可・5xx**は一時的な失敗とみなし`localStorage`に退避して再送対象にする。**401/403(未認証・allowlist対象外)・400/422(不正な入力)**は再送しても解決しないため、そのエントリは**破棄**する(ログアウト後もキューが残り続けることを防ぐ)。
 5. `localStorage`退避時のキーは**ログイン中のセッションの`userId`で名前空間化**する(例: `retryQueue:${userId}`)。次回アプリ起動時、現在のセッションに対応するキーの`localStorage`に退避済みのエントリがあれば同じ`id`のまま再送を試み、成功したら削除する。これにより、同じブラウザで別ユーザーがログインしても別の名前空間を見るだけなので、他人の未送信回答が混ざることはない。
@@ -234,9 +234,9 @@ function getQuizContext(env: Env) {
 - `wrangler.toml`（D1バインディング定義）
 - マイグレーション適用(`pnpm db:migrate`)を**手動で**実行する（自動化しない。8章参照）
 
-### 今後決めること: Server Action層の実装
+### 今後決めること: Server Action層の配線
 
-- `getQuizContext`相当のヘルパーをどこに置くか(`core`が提供するか、appが自分で書くか)は`core/src/actions`(`submitAnswer`)を実装する際に決める。現時点ではCloudflare Workersの`env`アクセスパターンが確定していないため保留。
+- `submitAnswer(request, { store, auth })`自体は実装済み(`core`)。`getQuizContext`相当のヘルパー(リクエストの`env`から`store`/`auth`を組み立てる部分)をどこに置くか(`core`が提供するか、appが自分で書くか)は、実際にwakuの`createApi`でルートを登録する際に決める。現時点ではCloudflare Workersの`env`アクセスパターン(waku側でのbindings受け渡し方法)が未確定のため保留。
 
 ## 8. CI/CD
 
