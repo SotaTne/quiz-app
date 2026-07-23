@@ -28,13 +28,21 @@ describe("SetListView", () => {
     expect(html).toContain("まだセットがありません");
   });
 
-  it("各セットのタイトル・問題数・習熟度を表示する", () => {
+  it("各セットのタイトル・問題数・4択/フラッシュカード別の習熟度を表示する", () => {
     const html = renderToStaticMarkup(
       <MantineProvider>
         <SetListView
           sets={[
-            { set: makeSet("english/part1", "英語 Part1", 10), masteryPercent: 40 },
-            { set: makeSet("javascript", "JavaScript", 5), masteryPercent: null },
+            {
+              set: makeSet("english/part1", "英語 Part1", 10),
+              quizMasteryPercent: 40,
+              flashcardMasteryPercent: null,
+            },
+            {
+              set: makeSet("javascript", "JavaScript", 5),
+              quizMasteryPercent: null,
+              flashcardMasteryPercent: 80,
+            },
           ]}
         />
       </MantineProvider>,
@@ -44,13 +52,22 @@ describe("SetListView", () => {
     expect(html).toContain("10問");
     expect(html).toContain("40%");
     expect(html).toContain("JavaScript");
+    expect(html).toContain("80%");
     expect(html).toContain("未着手");
   });
 
   it("階層を持つsetIdでも、そのままリンク先パスに使う", () => {
     const html = renderToStaticMarkup(
       <MantineProvider>
-        <SetListView sets={[{ set: makeSet("english/part1", "英語 Part1", 1), masteryPercent: null }]} />
+        <SetListView
+          sets={[
+            {
+              set: makeSet("english/part1", "英語 Part1", 1),
+              quizMasteryPercent: null,
+              flashcardMasteryPercent: null,
+            },
+          ]}
+        />
       </MantineProvider>,
     );
 

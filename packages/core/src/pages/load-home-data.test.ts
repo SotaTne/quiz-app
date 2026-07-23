@@ -1,13 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AuthLike } from "../actions/submit-answer.ts";
+import type { Mode } from "../domain/attempt.ts";
 import type { QuestionSet } from "../domain/question.ts";
 import type { Store } from "../store.ts";
 import { loadHomeData } from "./load-home-data.ts";
 
-function makeStore(latestAttempts: Map<string, { isCorrect: boolean }> = new Map()): Store {
+function makeStore(
+  attemptsByMode: Partial<Record<Mode, Map<string, { isCorrect: boolean }>>> = {},
+): Store {
   return {
     recordAttempt: vi.fn().mockResolvedValue(undefined),
-    listLatestAttempts: vi.fn().mockResolvedValue(latestAttempts),
+    listLatestAttempts: vi.fn((_userId: string, mode: Mode) => Promise.resolve(attemptsByMode[mode] ?? new Map())),
     listAccuracy: vi.fn().mockResolvedValue(new Map()),
   };
 }
@@ -46,7 +49,7 @@ describe("loadHomeData", () => {
     expect(store.listLatestAttempts).not.toHaveBeenCalled();
   });
 
-  it("未着手のセットはmasteryPercentがnull", async () => {
+  it("未着手のセットは両モードともmasteryPercentがnull", async () => {
     const store = makeStore();
     const auth = makeAuth("u1");
 
@@ -57,11 +60,20 @@ describe("loadHomeData", () => {
       questionSets: sets,
     });
 
-    expect(data).toEqual({ loggedIn: true, sets: [{ set: sets[0], masteryPercent: null }] });
+    expect(data).toEqual({
+      loggedIn: true,
+      sets: [{ set: sets[0], quizMasteryPercent: null, flashcardMasteryPercent: null }],
+    });
   });
 
-  it("一部回答済みなら回答済み分の正答率をmasteryPercentとする", async () => {
-    const store = makeStore(new Map([["q1", { isCorrect: true }]]));
+  it("4択とフラッシュカードで別々に正答率を計算する", async () => {
+    const store = makeStore({
+      quiz: new Map([["q1", { isCorrect: true }]]),
+      flashcard: new Map([
+        ["q1", { isCorrect: false }],
+        ["q2", { isCorrect: false }],
+      ]),
+    });
     const auth = makeAuth("u1");
 
     const data = await loadHomeData({
@@ -71,20 +83,9 @@ describe("loadHomeData", () => {
       questionSets: sets,
     });
 
-    expect(data).toEqual({ loggedIn: true, sets: [{ set: sets[0], masteryPercent: 100 }] });
-  });
-
-  it("回答済み分がすべて不正解ならmasteryPercentは0", async () => {
-    const store = makeStore(new Map([["q1", { isCorrect: false }]]));
-    const auth = makeAuth("u1");
-
-    const data = await loadHomeData({
-      request: new Request("http://localhost/"),
-      store,
-      auth,
-      questionSets: sets,
+    expect(data).toEqual({
+      loggedIn: true,
+      sets: [{ set: sets[0], quizMasteryPercent: 100, flashcardMasteryPercent: 0 }],
     });
-
-    expect(data).toEqual({ loggedIn: true, sets: [{ set: sets[0], masteryPercent: 0 }] });
   });
 });
