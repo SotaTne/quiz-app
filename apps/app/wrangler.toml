@@ -5,8 +5,8 @@ compatibility_flags = ["nodejs_compat"]
 
 [[d1_databases]]
 binding = "DB"
-database_name = "app-db"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_name = "quiz-app-db"
+database_id = "7f11e8c6-7a9d-4cf2-aa23-ad4197638d0d"
 # マイグレーションファイルはこのapp自身の./migrations配下に閉じて持つ(drizzle.config.ts参照)。
 
 [vars]
