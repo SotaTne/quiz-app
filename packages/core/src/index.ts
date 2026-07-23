@@ -17,4 +17,4 @@ export { createStore } from "./store";
 export type { Database, RecordAttemptInput, Store } from "./store";
 
 export { defineQuizConfig } from "./config";
-export type { DefineQuizConfigInput, QuizConfig } from "./config";
+export type { Auth, DefineQuizConfigInput, QuizConfig } from "./config";

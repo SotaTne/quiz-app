@@ -15,13 +15,13 @@
   "dependencies": {
     "@quiz/auth": "workspace:*",
     "@quiz/core": "workspace:*",
-    "drizzle-orm": "^0.36.4"
+    "drizzle-orm": "^0.45.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260723.1",
     "@types/better-sqlite3": "^7.6.13",
     "better-sqlite3": "^13.0.1",
-    "drizzle-kit": "^0.28.1",
+    "drizzle-kit": "^0.31.10",
     "typescript": "^7.0.0",
     "vitest": "^4.1.10"
   }
