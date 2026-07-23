@@ -1,0 +1,24 @@
+{
+  "name": "@quiz/app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "waku dev",
+    "build": "waku build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@quiz/auth": "workspace:*",
+    "@quiz/core": "workspace:*",
+    "@quiz/db": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "waku": "^0.22.0"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.0",
+    "vitest": "^4.1.10",
+    "wrangler": "^3.99.0"
+  }
+}

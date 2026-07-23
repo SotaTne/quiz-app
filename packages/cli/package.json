@@ -1,0 +1,16 @@
+{
+  "name": "@quiz/cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "quiz": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.0",
+    "vitest": "^4.1.10"
+  }
+}
