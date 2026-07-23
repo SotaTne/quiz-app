@@ -151,8 +151,9 @@ export function createStore(db: DrizzleD1Database<typeof schema>): Store { /* ..
 ## 5. `auth`パッケージ（自分用のbetter-auth設定）
 
 - better-authの標準テーブル(`user`/`session`/`account`/`verification`)を利用。ログイン方式はGoogle OAuthのみ。
-- ログイン後、`allowedEmails`にないメールアドレスはセッション発行時に拒否する。
-- secret/baseURL/allowedEmailsなどの実際の値は持たず、`app`から渡される。
+- `allowedEmails`にないメールアドレスは`databaseHooks.user.create.before`フックでアカウント作成自体を拒否する(公式に文書化されているallowlistパターン)。判定ロジック(`isEmailAllowed`)は純粋関数として切り出し、単体テストする。
+  - この方式は「アカウント作成時」に一度だけ効く。既存ユーザーを後から`allowedEmails`で締め出したい場合は自動対応しない(個人用アプリのため、締め出したければユーザー行を手動で削除すればよい、という割り切り)。
+- secret/baseURL/allowedEmails/Google認証情報などの実際の値は持たず、`app`から渡される。
 - こちらも汎用アダプタは目指さず、使いやすさ優先で作る。
 - better-auth CLIで生成するスキーマは`db`パッケージ側で取り込む（4章参照）。`auth`パッケージ自体はスキーマ/マイグレーションを持たない。
 
@@ -175,9 +176,14 @@ import { createAuth } from "@quiz/auth";
 
 const db = createDb(env.DB);
 const auth = createAuth({
+  db,
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
-  allowedEmails: ["kubotake1gomiru15@gmail.com"],
+  allowedEmails: ["allow@example.com"],
+  google: {
+    clientId: env.GOOGLE_CLIENT_ID,
+    clientSecret: env.GOOGLE_CLIENT_SECRET,
+  },
 });
 
 export default defineQuizConfig({
