@@ -68,7 +68,6 @@ graph TD
     Core --> C6["schema.ts 公開Drizzleスキーマ(attempts)"]
     Core --> C7["store.ts schemaに対応するStore実装"]
     Core --> C10["actions/ submitAnswer(1問ごと即時) Server Action"]
-    Core --> C8["config.ts defineQuizConfig()"]
     Core ==依存==> Auth
 
     Db --> D1S["schema.ts core.attempts + better-auth生成スキーマを統合"]
@@ -83,15 +82,15 @@ graph TD
     Cli --> CL2["new-set.ts `quiz new <name>` : content/questions/にMD雛形を生成(階層可)"]
     Cli -.コピー元.-> Templates
 
-    Templates --> T1["quiz.config.ts / waku.config.ts / wrangler.toml"]
+    Templates --> T1["waku.config.ts (quizContentPluginを直接登録)"]
+    Templates --> T3["wrangler.toml"]
     Templates --> T2["content/questions/example.md"]
     Templates -.依存(型チェック対象).-> Core
     Templates -.依存(型チェック対象).-> Auth
     Templates -.依存(型チェック対象).-> Db
 
-    App --> AP1["quiz.config.ts"]
     App --> AP2["content/questions/**/*.md (階層可、例: english/part1.md)"]
-    App --> AP3["waku.config.ts"]
+    App --> AP3["waku.config.ts (quizContentPluginを直接登録)"]
     App --> AP4["wrangler.toml"]
 
     App -.依存.-> Core
@@ -141,12 +140,6 @@ erDiagram
 
 ```mermaid
 classDiagram
-    class QuizConfig {
-        +string contentDir
-        +Db db
-        +Auth auth
-    }
-
     class Store {
         +recordAttempt(attempt) void
         +listAttempts(userId) Attempt[]
@@ -196,8 +189,6 @@ classDiagram
     DistractorGenerator ..> QuestionSet : samples from (self excluded, deduped)
     QuestionFilter ..> Attempt : reads latest per questionId+mode
     Attempt --> Question : references by id (loose)
-    QuizConfig ..> QuestionSet : locates via contentDir
-    QuizConfig o-- Store : uses
     Store ..> Attempt : persists via core.schema(attempts)
     SubmitAnswerAction ..> Store : calls recordAttempt (INSERT OR IGNORE by id, internal only)
     SubmitAnswerAction ..> Auth : reads session for userId

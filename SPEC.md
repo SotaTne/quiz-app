@@ -11,7 +11,7 @@
 - `core`: フレームワーク本体。VitePress/Astro Content Collectionsのように「設定 + コンテンツ → アプリ」を実現する。**`attempts`のDrizzleスキーマを公開エクスポート**し、そのスキーマに対して動く`Store`実装も同梱する（DBの抽象化はしない。Drizzle前提で割り切る）。**`auth`パッケージにも直接依存してよい**（抽象化のためのインターフェースを挟まず、`auth`をそのままimportしてセッション取得・回答判定・記録までを一気通貫でこなす「authも含めたフレームワーク」として設計する）。waku RSCページはブログフレームワークのテーマのように、デフォルト一式を提供しつつ差し替え・カスタマイズができるようにする。
 - `db`: `core`が公開するスキーマを使って、実際のD1インスタンスに対するマイグレーション管理・接続の組み立てを行うパッケージ。**汎用性より「自分が使いやすいこと」を優先**して作る。
 - `auth`: better-auth + Google OAuth + allowlistの設定をまとめるパッケージ。こちらも汎用性より使いやすさ優先。secret/baseURL/allowedEmailsなどの実際の値は持たない。
-- `app`: `core`・`db`・`auth`を組み立てる利用者側。実際の値(D1インスタンス、secret、allowedEmails)を渡し、マイグレーション適用の実行を担う。`quiz.config.ts`と`content/questions/**.md`を置くだけの薄い実装。
+- `app`: `core`・`db`・`auth`を組み立てる利用者側。実際の値(D1インスタンス、secret、allowedEmails)を渡し、マイグレーション適用の実行を担う。`waku.config.ts`(Vite pluginの登録)と`content/questions/**.md`を置くだけの薄い実装。**`defineQuizConfig()`のような単一の設定オブジェクトは作らない** — `contentDir`はビルド時(Vite plugin)だけの関心事、`store`/`auth`は実行時(リクエストごとの`env`)の関心事で、性質が違うものを1つにまとめる意味がなかったため撤回した(Cloudflare Workersはモジュールトップレベルで`env`に触れないため、`store`/`auth`はどのみちリクエスト処理の中で組み立てる必要がある)。
 - 機能は最小限に絞る。凝った機能が欲しくなったら別アプリを使う、を原則にする（過剰な抽象化・設定項目を増やさない）。
 - 将来、自分以外の人も`core`を使えるようにする（`core`が公開するスキーマ・`Store`実装・デフォルトページをベースに、`db`/`auth`だけ自分用に差し替えれば良い。`core→auth`の依存自体は固定でよい）。
 - **問題データ(正解を含む)がクライアントにそのまま渡ることは許容する。** 不正解防止のための秘匿は行わない（テスト前学習用の個人アプリであり、不正対策が必要な試験ではないため）。フラッシュカードはむしろ全カードの表裏データを事前にまとめてクライアントに渡し、カードをめくるたびの通信待ちをなくす。
@@ -23,15 +23,14 @@ quiz-app/
   packages/
     core/                     # フレームワーク本体
       src/
-        content/              # MDパーサー & スキーマ定義
-        vite-plugin/           # Vite plugin (content -> virtual module、標準搭載)
+        content/              # MDパーサー・スキーマ検証・deriveSetId()・loadQuestionSets()
+        vite-plugin/           # quizContentPlugin(): content -> virtual:quiz-content
         distractors/           # 4択の誤答生成ロジック
         filters/                # 出題フィルタ (全問 / 苦手問題のみ)
         pages/                 # waku(RSC)向けページ/コンポーネント (flashcard/4択/セット一覧、カスタマイズ可能)
         actions/                # waku Server Action: submitAnswer（1問ごと即時、authに直接依存）
         schema.ts               # 公開Drizzleスキーマ (attempts)
         store.ts                 # スキーマに対応するStore実装 (createStore)
-        config.ts              # defineQuizConfig()
     db/                       # core.attempts + better-authスキーマを束ねた、D1向けのマイグレーション/接続管理（自分用）
       src/
         schema.ts                # core.attempts + better-auth生成スキーマをまとめてre-export
@@ -46,12 +45,10 @@ quiz-app/
         new-set.ts                 # `quiz new <name>` : content/questions/配下にテーブル雛形のMDを生成(階層可)
     templates/
       default/                  # `quiz create`がコピーする、実在するワークスペースパッケージ
-        quiz.config.ts
-        waku.config.ts
+        waku.config.ts             # quizContentPluginをここで直接登録する
         wrangler.toml
         content/questions/example.md
     app/                      # 利用者側(自分の本番アプリ)。`quiz create`で生成し、core/db/authを組み立てるだけ
-      quiz.config.ts
       content/questions/**/*.md   # サブディレクトリでセットを分類可能(例: english/part1.md)
       waku.config.ts
       wrangler.toml
@@ -71,7 +68,7 @@ quiz-app/
 
 | 参考 | 取り入れる要素 |
 |---|---|
-| **VitePress** | 設定ファイル(`.vitepress/config.ts`)一つでサイト全体が組み上がる体験。`quiz.config.ts`で同様に実現 |
+| **VitePress** | 設定ファイル(`.vitepress/config.ts`)一つでサイト全体が組み上がる体験。`waku.config.ts`でのVite plugin登録として同様の体験を実現 |
 | **Astro Content Collections** | `Sources → Loaders → 型付きデータ → 出力`というパイプライン。MDテーブルをスキーマ(Zod等)でバリデーションしつつ型付きの`Question[]`に変換する設計を踏襲 |
 | **Quizlet** | フラッシュカードの操作感、複数の学習モード（フラッシュカード/4択/Learn）、セット単位の進捗表示 |
 
@@ -193,35 +190,51 @@ export function createStore(db: DrizzleD1Database<typeof schema>): Store { /* ..
 
 ## 7. `app`側に必要なもの（最小限）
 
+`quiz.config.ts`のような単一の設定ファイルは持たない。ビルド時の関心(`contentDir`)と実行時の関心(`db`/`auth`)を分けて、それぞれ必要な場所で直接組み立てる。
+
 ```ts
-// quiz.config.ts
-import { defineQuizConfig } from "@quiz/core";
-import { createDb } from "@quiz/db";
-import { createAuth } from "@quiz/auth";
+// waku.config.ts — ビルド時。Vite pluginをそのまま登録するだけ
+import { quizContentPlugin } from "@quiz/core";
+import { defineConfig } from "waku/config";
 
-const db = createDb(env.DB);
-const auth = createAuth({
-  db,
-  secret: env.BETTER_AUTH_SECRET,
-  baseURL: env.BETTER_AUTH_URL,
-  allowedEmails: ["allow@example.com"],
-  google: {
-    clientId: env.GOOGLE_CLIENT_ID,
-    clientSecret: env.GOOGLE_CLIENT_SECRET,
+export default defineConfig({
+  unstable_viteConfigs: {
+    common: () => ({
+      plugins: [quizContentPlugin({ contentDir: "./content/questions" })],
+    }),
   },
-});
-
-export default defineQuizConfig({
-  contentDir: "./content/questions",
-  db,
-  auth,
 });
 ```
 
-- `content/questions/**.md`
-- `waku.config.ts`（`core`のプラグイン/ページを読み込むだけ）
+```ts
+// 例: Server Action側。実行時、リクエストのenvからdb/authをその都度組み立てる
+import { createStore } from "@quiz/core";
+import { createAuth } from "@quiz/auth";
+import { createDb } from "@quiz/db";
+
+function getQuizContext(env: Env) {
+  const db = createDb(env.DB);
+  return {
+    store: createStore(db),
+    auth: createAuth({
+      db,
+      secret: env.BETTER_AUTH_SECRET,
+      baseURL: env.BETTER_AUTH_URL,
+      allowedEmails: ["allow@example.com"],
+      google: { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET },
+    }),
+  };
+}
+```
+
+- `content/questions/**/*.md`
+- `waku.config.ts`(Vite pluginの登録)
 - `wrangler.toml`（D1バインディング定義）
 - マイグレーション適用(`pnpm db:migrate`)を**手動で**実行する（自動化しない。8章参照）
+
+### 今後決めること: Server Action層の実装
+
+- `getQuizContext`相当のヘルパーをどこに置くか(`core`が提供するか、appが自分で書くか)は`core/src/actions`(`submitAnswer`)を実装する際に決める。現時点ではCloudflare Workersの`env`アクセスパターンが確定していないため保留。
 
 ## 8. CI/CD
 

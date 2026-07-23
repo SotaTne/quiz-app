@@ -10,7 +10,7 @@ export { loadQuestionSets } from "./content/load-question-sets";
 export type { LoadQuestionSetsResult } from "./content/load-question-sets";
 
 export { quizContentPlugin } from "./vite-plugin";
-export type { QuizContentPluginOptions } from "./vite-plugin";
+export type { QuizContentPluginOptions, QuizContentVitePlugin } from "./vite-plugin";
 
 export { generateDistractors } from "./distractors/generate-distractors";
 
@@ -23,6 +23,3 @@ export { attempts } from "./schema";
 
 export { createStore } from "./store";
 export type { Database, RecordAttemptInput, Store } from "./store";
-
-export { defineQuizConfig } from "./config";
-export type { Auth, DefineQuizConfigInput, QuizConfig } from "./config";
