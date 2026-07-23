@@ -70,11 +70,11 @@ export function FlashcardView({ question, onAnswer }: FlashcardViewProps) {
         userSelect: "none",
       }}
     >
-      <Text ta="center" size="lg" fw={500}>
+      <Text ta="center" size="lg" fw={500} style={{ userSelect: "text" }}>
         {flipped ? question.answer : question.question}
       </Text>
       {flipped && question.explanation && (
-        <Text ta="center" size="sm" c="dimmed" mt="sm">
+        <Text ta="center" size="sm" c="dimmed" mt="sm" style={{ userSelect: "text" }}>
           {question.explanation}
         </Text>
       )}
