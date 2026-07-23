@@ -53,7 +53,7 @@ better-authの設計を参考に、`core`がDrizzleスキーマとStore実装を
 graph TD
     Root["quiz-app/"]
     Root --> Core["packages/core<br/>(フレームワーク本体)"]
-    Root --> Db["packages/db<br/>(D1接続・マイグレーション、自分用)"]
+    Root --> Db["packages/db<br/>(D1スキーマ・接続、自分用)"]
     Root --> Auth["packages/auth<br/>(better-auth設定、自分用)"]
     Root --> Cli["packages/cli<br/>(アプリ雛形・セット雛形の生成)"]
     Root --> Templates["packages/templates/default<br/>(quiz createがコピーする実パッケージ)"]
@@ -71,8 +71,7 @@ graph TD
     Core ==依存==> Auth
 
     Db --> D1S["schema.ts core.attempts + better-auth生成スキーマを統合"]
-    Db --> D1M["migrations/ drizzle-kit生成（唯一の適用先）"]
-    Db --> D1C["client.ts D1接続の組み立て"]
+    Db --> D1C["client.ts D1接続の組み立て（migrationsはここに置かない）"]
     Db -.importする.-> C6
 
     Auth --> A1["auth.ts better-auth + Google + allowlist"]
@@ -83,7 +82,8 @@ graph TD
     Cli -.コピー元.-> Templates
 
     Templates --> T1["waku.config.ts (quizContentPluginを直接登録)"]
-    Templates --> T3["wrangler.toml"]
+    Templates --> T3["wrangler.toml (migrations_dirは指定せずデフォルトの./migrationsを使う)"]
+    Templates --> T4["drizzle.config.ts (schema: node_modules/@quiz/db/src/schema.ts, out: ./migrations)"]
     Templates --> T2["content/questions/example.md"]
     Templates -.依存(型チェック対象).-> Core
     Templates -.依存(型チェック対象).-> Auth
@@ -92,6 +92,7 @@ graph TD
     App --> AP2["content/questions/**/*.md (階層可、例: english/part1.md)"]
     App --> AP3["waku.config.ts (quizContentPluginを直接登録)"]
     App --> AP4["wrangler.toml"]
+    App --> AP5["migrations/ (drizzle-kit generateの出力先。dbには置かずappに閉じる)"]
 
     App -.依存.-> Core
     App -.依存.-> Db
@@ -134,7 +135,7 @@ erDiagram
     }
 ```
 
-`db`パッケージは`ATTEMPTS`とbetter-auth標準テーブル(`USER`/`SESSION`/`ACCOUNT`)を1つの`schema.ts`にまとめ、単一のマイグレーション履歴で管理する（別々のマイグレーションフローにしない）。
+`db`パッケージは`ATTEMPTS`とbetter-auth標準テーブル(`USER`/`SESSION`/`ACCOUNT`)を1つの`schema.ts`にまとめる（別々のマイグレーションフローにしない）。ただしマイグレーションファイルの実体・単一の履歴は`db`ではなく実際にD1を持つ`app`(`apps/app/migrations/`)側に閉じて持つ。
 
 ## 4. クラス図（coreのドメインモデル）
 

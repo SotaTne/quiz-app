@@ -10,7 +10,12 @@ export default defineConfig({
   vite: {
     environments: {
       rsc: {
-        optimizeDeps: { include: ["hono/tiny"] },
+        optimizeDeps: {
+          include: ["hono/tiny"],
+          // devの依存事前バンドルスキャンは`cloudflare:workers`を解決できず警告を出すだけ
+          // (実行時はcloudflare()プラグインがworkerd経由で解決するので実害はない)。除外して静める。
+          exclude: ["cloudflare:workers"],
+        },
         build: {
           rolldownOptions: {
             platform: "neutral",

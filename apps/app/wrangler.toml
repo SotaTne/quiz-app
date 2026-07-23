@@ -5,3 +5,4 @@ compatibility_date = "2026-01-01"
 binding = "DB"
 database_name = "app-db"
 database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+# マイグレーションファイルはこのapp自身の./migrations配下に閉じて持つ(drizzle.config.ts参照)。

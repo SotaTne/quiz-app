@@ -4,11 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "pnpm db:migrate",
     "dev": "waku dev --port 3000",
     "build": "waku build",
     "start": "waku start --port 3000",
     "typecheck": "tsc --noEmit",
-    "db:migrate": "wrangler d1 migrations apply DB"
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "wrangler d1 migrations apply DB --local"
   },
   "dependencies": {
     "@quiz/auth": "workspace:*",
@@ -23,6 +25,7 @@
     "@cloudflare/vite-plugin": "^1.46.0",
     "@cloudflare/workers-types": "^5.20260723.1",
     "@types/node": "24",
+    "drizzle-kit": "^0.31.10",
     "esbuild": "^0.27.0",
     "typescript": "^7.0.0",
     "wrangler": "^4.113.0"
