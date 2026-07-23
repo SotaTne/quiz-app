@@ -4,8 +4,8 @@ import type { Mode } from "./domain/attempt";
 import { attempts } from "./schema";
 
 /**
- * Driver-agnostic handle: satisfied by both `drizzle-orm/d1` (production, Cloudflare D1)
- * and `drizzle-orm/better-sqlite3` (tests, see store.test.ts). Same SQLite dialect either way.
+ * ドライバに依存しない型。`drizzle-orm/d1`(本番、Cloudflare D1)と
+ * `drizzle-orm/better-sqlite3`(テスト、store.test.ts参照)のどちらでも満たせる。SQLite方言は共通。
  */
 export type Database = BaseSQLiteDatabase<"sync" | "async", unknown, { attempts: typeof attempts }>;
 
@@ -18,9 +18,9 @@ export type RecordAttemptInput = {
 };
 
 export type Store = {
-  /** Idempotent by `id` (INSERT OR IGNORE) — safe to call again after a retry. */
+  /** `id`で冪等(INSERT OR IGNORE) — 再送しても安全。 */
   recordAttempt(input: RecordAttemptInput): Promise<void>;
-  /** One entry per questionId: the most recent attempt for that user+mode (ties broken by id desc). */
+  /** questionIdごとに1件: そのuser+modeにおける最新の回答(同時刻はidの降順でタイブレーク)。 */
   listLatestAttempts(userId: string, mode: Mode): Promise<Map<string, { isCorrect: boolean }>>;
 };
 

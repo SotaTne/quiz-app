@@ -5,16 +5,16 @@ import { checkAnswer } from "./check-answer";
 const question: Question = { id: "q1", question: "1+1?", answer: "2", explanation: null };
 
 describe("checkAnswer", () => {
-  it("returns true for an exact match", () => {
+  it("完全一致ならtrueを返す", () => {
     expect(checkAnswer(question, "2")).toBe(true);
   });
 
-  it("ignores surrounding whitespace and case", () => {
+  it("前後の空白と大文字小文字を無視する", () => {
     expect(checkAnswer(question, "  2  ")).toBe(true);
     expect(checkAnswer({ ...question, answer: "Object" }, "object")).toBe(true);
   });
 
-  it("returns false for a wrong answer", () => {
+  it("不正解ならfalseを返す", () => {
     expect(checkAnswer(question, "3")).toBe(false);
   });
 });

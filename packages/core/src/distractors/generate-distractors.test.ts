@@ -11,7 +11,7 @@ function set(id: string, questions: Question[]): QuestionSet {
 }
 
 describe("generateDistractors", () => {
-  it("samples 3 distractors from the same set, excluding the question's own answer", () => {
+  it("同じセットから、対象問題自身の答えを除いて3つの誤答を選ぶ", () => {
     const target = q("t", "correct");
     const current = set("s1", [target, q("a", "wrong-a"), q("b", "wrong-b"), q("c", "wrong-c"), q("d", "wrong-d")]);
 
@@ -22,7 +22,7 @@ describe("generateDistractors", () => {
     expect(result).not.toContain("correct");
   });
 
-  it("deduplicates answers that only differ by whitespace/case", () => {
+  it("空白・大文字小文字だけが違う答えは重複とみなす", () => {
     const target = q("t", "correct");
     const current = set("s1", [
       target,
@@ -37,12 +37,12 @@ describe("generateDistractors", () => {
 
     expect(result).not.toBeNull();
     expect(result).toHaveLength(3);
-    // "Wrong"/" wrong "/"WRONG" count as one candidate, so only one of them can appear
+    // "Wrong"/" wrong "/"WRONG" は1つの候補として数えるので、いずれか1つしか出てこない
     const wrongVariants = result?.filter((a) => a.trim().toLowerCase() === "wrong") ?? [];
     expect(wrongVariants).toHaveLength(1);
   });
 
-  it("falls back to other sets when the current set doesn't have enough distinct answers", () => {
+  it("同一セット内の候補が足りない場合は他のセットから補う", () => {
     const target = q("t", "correct");
     const current = set("s1", [target, q("a", "only-one")]);
     const other = set("s2", [q("x", "from-other-1"), q("y", "from-other-2")]);
@@ -53,7 +53,7 @@ describe("generateDistractors", () => {
     expect(result).toHaveLength(3);
   });
 
-  it("returns null when fewer than 3 distinct distractors exist anywhere", () => {
+  it("どこを探しても3つ揃わない場合はnullを返す", () => {
     const target = q("t", "correct");
     const current = set("s1", [target, q("a", "only-one")]);
 

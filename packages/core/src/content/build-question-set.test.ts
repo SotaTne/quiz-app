@@ -11,7 +11,7 @@ title: JavaScript基礎
 | js-002 | 1+1? | 2 |  |`;
 
 describe("buildQuestionSet", () => {
-  it("builds a QuestionSet from frontmatter + table markdown", () => {
+  it("frontmatter+テーブルのmarkdownからQuestionSetを構築する", () => {
     const result = buildQuestionSet({ setId: "javascript-basics", markdown: valid });
 
     expect(result.ok).toBe(true);
@@ -26,7 +26,7 @@ describe("buildQuestionSet", () => {
     });
   });
 
-  it("falls back to the setId as the title when frontmatter has no title", () => {
+  it("frontmatterにtitleがない場合はsetIdをtitleとして使う", () => {
     const markdown = valid.replace("title: JavaScript基礎\n", "");
     const result = buildQuestionSet({ setId: "javascript-basics", markdown });
 
@@ -35,7 +35,7 @@ describe("buildQuestionSet", () => {
     expect(result.data.title).toBe("javascript-basics");
   });
 
-  it("fails when a row is missing a required column", () => {
+  it("必須列が欠けている行があると失敗する", () => {
     const markdown = `| id | question | answer |
 |----|----------|--------|
 | js-001 | typeof null? |  |`;
@@ -47,13 +47,13 @@ describe("buildQuestionSet", () => {
     expect(result.errors[0]).toMatch(/answer/);
   });
 
-  it("fails when the table has no rows at all", () => {
+  it("テーブルに行が1つもないと失敗する", () => {
     const result = buildQuestionSet({ setId: "empty", markdown: "no table here" });
 
     expect(result.ok).toBe(false);
   });
 
-  it("fails when the same id appears twice within the set", () => {
+  it("同じセット内に同じidが2回出てくると失敗する", () => {
     const markdown = `| id | question | answer |
 |----|----------|--------|
 | dup | q1 | a1 |

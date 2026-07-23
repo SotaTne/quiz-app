@@ -3,7 +3,7 @@ export type ParsedFrontmatter = {
   body: string;
 };
 
-/** Splits a leading `---`-delimited YAML-ish block (flat `key: value` pairs only) from the rest of the document. */
+/** 先頭の `---` で囲まれたブロック(フラットな `key: value` のみ)と、それ以降の本文を分離する。 */
 export function parseFrontmatter(source: string): ParsedFrontmatter {
   const lines = source.split("\n");
 

@@ -4,9 +4,9 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { attempts } from "./schema";
 import { createStore, type Database, type Store } from "./store";
 
-// Mirrors schema.ts's `attempts` table. better-sqlite3 is used instead of a virtual
-// Cloudflare Worker because it's the same SQLite dialect D1 uses and needs no
-// wrangler/Miniflare setup — enough to verify the Store's SQL is correct.
+// schema.tsの`attempts`テーブルを模したもの。仮想Cloudflare Workerではなく
+// better-sqlite3を使うのは、D1と同じSQLite方言でwrangler/Miniflareのセットアップが不要かつ
+// Storeが発行するSQLの正しさを検証するには十分だから。
 const CREATE_ATTEMPTS_TABLE = `
   create table attempts (
     id text primary key,
@@ -33,7 +33,7 @@ afterEach(() => {
 });
 
 describe("createStore", () => {
-  it("records an attempt and returns it as the latest for that question", async () => {
+  it("回答を記録し、その問題の最新の回答として返す", async () => {
     await store.recordAttempt({ id: "a1", userId: "u1", questionId: "q1", mode: "quiz", isCorrect: true });
 
     const latest = await store.listLatestAttempts("u1", "quiz");
@@ -41,7 +41,7 @@ describe("createStore", () => {
     expect(latest.get("q1")).toEqual({ isCorrect: true });
   });
 
-  it("is idempotent: re-sending the same id does not overwrite the original record", async () => {
+  it("冪等: 同じidを再送しても元の記録を上書きしない", async () => {
     await store.recordAttempt({ id: "a1", userId: "u1", questionId: "q1", mode: "quiz", isCorrect: true });
     await store.recordAttempt({ id: "a1", userId: "u1", questionId: "q1", mode: "quiz", isCorrect: false });
 
@@ -50,7 +50,7 @@ describe("createStore", () => {
     expect(latest.get("q1")).toEqual({ isCorrect: true });
   });
 
-  it("only considers the most recent attempt per question (answeredAt desc)", async () => {
+  it("問題ごとに最新の回答(answeredAtの降順)だけを見る", async () => {
     const db = drizzle(sqlite) as unknown as Database;
     await db.insert(attempts).values([
       { id: "old", userId: "u1", questionId: "q1", mode: "quiz", isCorrect: false, answeredAt: new Date(1000) },
@@ -62,7 +62,7 @@ describe("createStore", () => {
     expect(latest.get("q1")).toEqual({ isCorrect: true });
   });
 
-  it("breaks same-timestamp ties by id desc", async () => {
+  it("同時刻の場合はidの降順でタイブレークする", async () => {
     const db = drizzle(sqlite) as unknown as Database;
     const sameTime = new Date(1000);
     await db.insert(attempts).values([
@@ -72,11 +72,11 @@ describe("createStore", () => {
 
     const latest = await store.listLatestAttempts("u1", "quiz");
 
-    // "b" > "a" lexicographically, so it wins the tie-break.
+    // 辞書順で "b" > "a" なので、タイブレークでは "b" が勝つ。
     expect(latest.get("q1")).toEqual({ isCorrect: true });
   });
 
-  it("keeps quiz and flashcard attempts separate for the same question", async () => {
+  it("同じ問題でもquizとflashcardの回答は別々に扱う", async () => {
     await store.recordAttempt({ id: "a1", userId: "u1", questionId: "q1", mode: "quiz", isCorrect: true });
     await store.recordAttempt({ id: "a2", userId: "u1", questionId: "q1", mode: "flashcard", isCorrect: false });
 
@@ -84,7 +84,7 @@ describe("createStore", () => {
     expect((await store.listLatestAttempts("u1", "flashcard")).get("q1")).toEqual({ isCorrect: false });
   });
 
-  it("does not leak attempts between users", async () => {
+  it("ユーザー間で回答が混ざらない", async () => {
     await store.recordAttempt({ id: "a1", userId: "u1", questionId: "q1", mode: "quiz", isCorrect: true });
     await store.recordAttempt({ id: "a2", userId: "u2", questionId: "q1", mode: "quiz", isCorrect: false });
 

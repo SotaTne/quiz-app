@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parseFrontmatter } from "./parse-frontmatter";
 
 describe("parseFrontmatter", () => {
-  it("splits a leading --- block into key/value pairs and returns the rest as body", () => {
+  it("先頭の---ブロックをkey/valueに分割し、残りをbodyとして返す", () => {
     const input = `---
 title: JavaScript基礎
 ---
@@ -15,14 +15,14 @@ title: JavaScript基礎
     expect(result.body.trim()).toBe("| id | question |");
   });
 
-  it("returns an empty frontmatter object when there is no --- block", () => {
+  it("---ブロックがない場合は空のfrontmatterを返す", () => {
     const result = parseFrontmatter("| id | question |");
 
     expect(result.frontmatter).toEqual({});
     expect(result.body).toBe("| id | question |");
   });
 
-  it("ignores blank lines inside the frontmatter block", () => {
+  it("frontmatterブロック内の空行を無視する", () => {
     const input = `---
 title: Foo
 

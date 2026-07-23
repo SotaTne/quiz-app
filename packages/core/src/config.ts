@@ -8,11 +8,11 @@ export type QuizConfig = {
 export type DefineQuizConfigInput = {
   contentDir: string;
   db: Database;
-  // `auth` is wired in once @quiz/auth exists; core will read the session from it
-  // directly (see SPEC.md 1: core is allowed to depend on auth).
+  // authは@quiz/authの実装が揃い次第ここに追加する。coreはそこから直接セッションを読む
+  // (SPEC.md 1章: coreがauthに依存すること自体は許容している)。
 };
 
-/** Assembles the pieces an `app` provides (a DB connection, later auth) into one config. */
+/** `app`が用意するもの(DB接続、後でauthも)を1つの設定にまとめる。 */
 export function defineQuizConfig(input: DefineQuizConfigInput): QuizConfig {
   return {
     contentDir: input.contentDir,

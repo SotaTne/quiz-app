@@ -1,8 +1,12 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 /**
- * Public schema for the `attempts` table (see SPEC.md 3.6). `db` imports this to
- * generate migrations; production reads/writes go through `createStore` (./store.ts).
+ * 公開スキーマ: `attempts`テーブル(SPEC.md 3.6参照)。`db`パッケージがこれをimportし、
+ * 共有D1のマイグレーション履歴を1つにまとめる。本番の読み書きは`createStore`(./store.ts)経由で行う。
+ *
+ * `userId`はbetter-authの`user.id`への外部キーを張らない。単一ユーザーの個人用アプリのため、
+ * DB側で参照整合性を強制するメリットが薄く、そのために`core`が`auth`のテーブル定義に
+ * 依存する複雑さの方が見合わない(questionIdも同様の理由でFK制約なし)。
  */
 export const attempts = sqliteTable("attempts", {
   id: text("id").primaryKey(),

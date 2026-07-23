@@ -3,9 +3,9 @@ import type { Question } from "../domain/question";
 const normalize = (value: string) => value.trim().toLowerCase();
 
 /**
- * Client-side correctness check for quiz mode. Not a security boundary — the answer
- * data is already bundled to the client (see SPEC.md 3.1), so this only decides what
- * gets recorded as `isCorrect`, not who is allowed to see the answer.
+ * 4択モードのクライアント側正誤判定。セキュリティ境界ではない — 正解データは
+ * すでにクライアントへ配信済み(SPEC.md 3.1参照)なので、これは「誰が答えを見られるか」
+ * ではなく「`isCorrect`として何を記録するか」だけを決める関数。
  */
 export function checkAnswer(question: Question, selectedAnswer: string): boolean {
   return normalize(question.answer) === normalize(selectedAnswer);

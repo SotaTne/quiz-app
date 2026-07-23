@@ -6,8 +6,8 @@ function splitRow(line: string): string[] {
 }
 
 /**
- * Parses the first markdown table found in `markdown` into row objects keyed by header name.
- * Accepts both `| a | b |` and bare `a | b` GFM table styles (leading/trailing `|` are optional).
+ * `markdown`内で最初に見つかったテーブルを、ヘッダー名をキーにした行オブジェクトの配列に変換する。
+ * `| a | b |` 形式・先頭/末尾の `|` を省略した `a | b` 形式のどちらも受け付ける。
  */
 export function parseTable(markdown: string): Record<string, string>[] {
   const lines = markdown.split("\n").map((line) => line.trim());

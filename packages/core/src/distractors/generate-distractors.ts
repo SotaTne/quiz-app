@@ -29,8 +29,8 @@ function sample(pool: string[], count: number, random: () => number): string[] {
 }
 
 /**
- * Picks 3 wrong-answer choices for `question`, preferring answers from its own set.
- * Returns null when fewer than 3 distinct distractors exist anywhere.
+ * `question`の誤答選択肢を3つ選ぶ。同じセット内の他問題の答えを優先し、足りない場合は全セットから補う。
+ * どこを探しても3つ揃わない場合はnullを返す。
  */
 export function generateDistractors(
   question: Question,

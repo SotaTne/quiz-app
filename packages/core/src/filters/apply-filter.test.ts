@@ -9,17 +9,17 @@ function q(id: string): Question {
 describe("applyFilter", () => {
   const questions = [q("a"), q("b"), q("c")];
 
-  it("returns every question when filterType is 'all'", () => {
+  it("filterTypeが'all'なら全問題を返す", () => {
     const latest = new Map([["a", { isCorrect: true }]]);
 
     expect(applyFilter("all", questions, latest)).toEqual(questions);
   });
 
-  it("keeps only questions with no attempt yet or a most-recent wrong attempt when filterType is 'weak'", () => {
+  it("filterTypeが'weak'なら未回答または直近が不正解の問題だけ残す", () => {
     const latest = new Map([
       ["a", { isCorrect: true }],
       ["b", { isCorrect: false }],
-      // "c" has never been answered
+      // "c"は一度も回答していない
     ]);
 
     const result = applyFilter("weak", questions, latest);
@@ -27,7 +27,7 @@ describe("applyFilter", () => {
     expect(result.map((question) => question.id)).toEqual(["b", "c"]);
   });
 
-  it("excludes a question once its most recent attempt is correct", () => {
+  it("直近の回答が正解になった問題は除外する", () => {
     const latest = new Map([
       ["a", { isCorrect: true }],
       ["b", { isCorrect: true }],

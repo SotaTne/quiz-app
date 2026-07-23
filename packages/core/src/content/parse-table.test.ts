@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parseTable } from "./parse-table";
 
 describe("parseTable", () => {
-  it("parses a markdown table into row objects keyed by header", () => {
+  it("markdownテーブルをヘッダー名をキーにした行オブジェクトに変換する", () => {
     const markdown = `| id | question | answer | explanation |
 |----|----------|--------|-------------|
 | js-001 | typeof null? | object | quirk |
@@ -16,11 +16,11 @@ describe("parseTable", () => {
     ]);
   });
 
-  it("returns an empty array when there is no table", () => {
+  it("テーブルがない場合は空配列を返す", () => {
     expect(parseTable("just some text")).toEqual([]);
   });
 
-  it("ignores content before the table", () => {
+  it("テーブルより前にある文章は無視する", () => {
     const markdown = `some intro text
 
 | id | answer |
@@ -30,7 +30,7 @@ describe("parseTable", () => {
     expect(parseTable(markdown)).toEqual([{ id: "a", answer: "b" }]);
   });
 
-  it("accepts bare rows without leading/trailing pipes", () => {
+  it("先頭/末尾に|がない素の行も受け付ける", () => {
     const markdown = `id | answer
 ---|---
 a | b`;
@@ -38,7 +38,7 @@ a | b`;
     expect(parseTable(markdown)).toEqual([{ id: "a", answer: "b" }]);
   });
 
-  it("stops at the first blank line after the table", () => {
+  it("テーブルの後の最初の空行で読み取りを止める", () => {
     const markdown = `| id | answer |
 |----|--------|
 | a | b |

@@ -2,7 +2,7 @@ import type { Question } from "../domain/question";
 
 export type FilterType = "all" | "weak";
 
-/** `latestAttempt` should already be scoped to one user + one mode (one entry per questionId). */
+/** `latestAttempt`は事前に1ユーザー+1modeに絞り込み済み(questionIdごとに1件)であること。 */
 export function applyFilter(
   filterType: FilterType,
   questions: Question[],
