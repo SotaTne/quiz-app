@@ -1,0 +1,25 @@
+{
+  "name": "quiz-app-template",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "waku dev",
+    "build": "waku build",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "wrangler d1 migrations apply DB"
+  },
+  "dependencies": {
+    "@quiz/auth": "workspace:*",
+    "@quiz/core": "workspace:*",
+    "@quiz/db": "workspace:*",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "waku": "^0.22.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260723.1",
+    "typescript": "^7.0.0",
+    "wrangler": "^3.99.0"
+  }
+}
