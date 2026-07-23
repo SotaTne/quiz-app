@@ -7,7 +7,7 @@
 ```mermaid
 graph TD
     subgraph Build["ビルド時"]
-        MD["content/questions/**.md<br/>(1ファイル=1セット)"]
+        MD["content/questions/**/*.md<br/>(1ファイル=1セット、サブディレクトリで分類可)"]
         VitePlugin["core: vite-plugin<br/>(MDパース→仮想モジュール)"]
         MD --> VitePlugin
     end
@@ -55,11 +55,12 @@ graph TD
     Root --> Core["packages/core<br/>(フレームワーク本体)"]
     Root --> Db["packages/db<br/>(D1接続・マイグレーション、自分用)"]
     Root --> Auth["packages/auth<br/>(better-auth設定、自分用)"]
-    Root --> Cli["packages/cli<br/>(新セット雛形生成)"]
+    Root --> Cli["packages/cli<br/>(アプリ雛形・セット雛形の生成)"]
+    Root --> Templates["packages/templates/default<br/>(quiz createがコピーする実パッケージ)"]
     Root --> App["packages/app<br/>(自分の本番アプリ)"]
     Root --> Docs["packages/docs<br/>(Astro Starlight)"]
 
-    Core --> C1["content/ MDパーサー・スキーマ検証"]
+    Core --> C1["content/ MDパーサー・スキーマ検証・deriveSetId()"]
     Core --> C2["vite-plugin/ 仮想モジュール化"]
     Core --> C3["distractors/ 誤答生成"]
     Core --> C4["filters/ 出題フィルタ(全問/苦手問題のみ)"]
@@ -78,10 +79,18 @@ graph TD
     Auth --> A1["auth.ts better-auth + Google + allowlist"]
     Auth -.スキーマはdbが取り込む.-> D1S
 
-    Cli --> CL1["new.ts `quiz new <name>` : content/questions/にMD雛形を生成"]
+    Cli --> CL1["create-app.ts `quiz create <name>` : templates/defaultをコピー"]
+    Cli --> CL2["new-set.ts `quiz new <name>` : content/questions/にMD雛形を生成(階層可)"]
+    Cli -.コピー元.-> Templates
+
+    Templates --> T1["quiz.config.ts / waku.config.ts / wrangler.toml"]
+    Templates --> T2["content/questions/example.md"]
+    Templates -.依存(型チェック対象).-> Core
+    Templates -.依存(型チェック対象).-> Auth
+    Templates -.依存(型チェック対象).-> Db
 
     App --> AP1["quiz.config.ts"]
-    App --> AP2["content/questions/**.md"]
+    App --> AP2["content/questions/**/*.md (階層可、例: english/part1.md)"]
     App --> AP3["waku.config.ts"]
     App --> AP4["wrangler.toml"]
 
@@ -236,20 +245,23 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    participant MD as content/questions/*.md
+    participant MD as content/questions/**/*.md
     participant Plugin as core: vite-plugin
+    participant SetId as core: deriveSetId()
     participant Schema as core: schema検証
     participant VM as 仮想モジュール
     participant Page as waku RSC Page
 
-    MD->>Plugin: ファイル変更検知 / ビルド開始
+    MD->>Plugin: ファイル変更検知 / ビルド開始(サブディレクトリ含め再帰的に収集)
+    Plugin->>SetId: ファイルパスからsetIdを導出(例: english/part1.md → "english/part1")
+    SetId-->>Plugin: setId
     Plugin->>Plugin: テーブルをパース
     Plugin->>Schema: 必須列(id/question/answer)を検証
     Schema-->>Plugin: 検証結果
     alt 検証エラー
         Plugin-->>Plugin: ビルドエラーとして中断
     else OK
-        Plugin->>VM: 型付きQuestionSet[]を生成
+        Plugin->>VM: 型付きQuestionSet[]を生成(setIdは階層を保持)
     end
     Page->>VM: import
     VM-->>Page: QuestionSet[]

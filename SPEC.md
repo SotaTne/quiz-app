@@ -40,12 +40,19 @@ quiz-app/
     auth/                     # better-auth + Google OAuth + allowlistの設定（自分用）
       src/
         auth.ts                  # better-auth設定(secret/baseURL/allowedEmailsはappから注入)
-    cli/                      # 新しいセット(問題フォルダ/MDファイル)を生成するCLI
+    cli/                      # アプリ雛形・セット雛形を生成するCLI
       src/
-        new.ts                    # `quiz new <name>` : content/questions/配下にテーブル雛形のMDを生成
-    app/                      # 利用者側(自分の本番アプリ)。core/db/authを組み立てるだけ
+        create-app.ts             # `quiz create <name>` : templates/defaultをコピーしてアプリを生成
+        new-set.ts                 # `quiz new <name>` : content/questions/配下にテーブル雛形のMDを生成(階層可)
+    templates/
+      default/                  # `quiz create`がコピーする、実在するワークスペースパッケージ
+        quiz.config.ts
+        waku.config.ts
+        wrangler.toml
+        content/questions/example.md
+    app/                      # 利用者側(自分の本番アプリ)。`quiz create`で生成し、core/db/authを組み立てるだけ
       quiz.config.ts
-      content/questions/**.md
+      content/questions/**/*.md   # サブディレクトリでセットを分類可能(例: english/part1.md)
       waku.config.ts
       wrangler.toml
     docs/                     # ドキュメントサイト(Astro Starlight)
@@ -72,10 +79,12 @@ SRS(間隔反復・Ankiのようなease factor/due date管理)は今回の用途
 
 ### 3.1 Content Layer（Astro参考）
 
-1. `content/questions/**.md` を読み込む（1ファイル=1セット）
+1. `content/questions/**/*.md` を読み込む（1ファイル=1セット）。サブディレクトリでセットを分類できる(例: `content/questions/english/part1.md`)。setIdは`contentDir`からの相対パス(拡張子を除く)で、階層をそのまま持つ(`english/part1`)。`deriveSetId(contentDir, filePath)`がこの変換を担う純粋関数(`core`が提供)。
 2. テーブルをパースし、スキーマ検証（必須列: id/question/answer）
 3. 検証済みデータを型付きJSONとしてビルド時に生成
 4. Vite plugin（標準搭載）でこれを仮想モジュール化し、wakuの開発サーバー/ビルドからimportできるようにする（HMR対応）。waku自体もRSC(React Server Components)構成で組む。
+
+階層はセットの置き場所(ファイルパス)だけの話であり、個々の`Question`自体はフラットなまま(サブ問題や入れ子構造は持たない)。4択の誤答生成・出題フィルタ・Storeはどれも`questionId`の文字列内容に依存しないため、この階層化によるロジック変更は不要。
 
 ### 3.2 出題フィルタ（全問 / 苦手問題のみ）
 
@@ -157,14 +166,30 @@ export function createStore(db: DrizzleD1Database<typeof schema>): Store { /* ..
 - こちらも汎用アダプタは目指さず、使いやすさ優先で作る。
 - better-auth CLIで生成するスキーマは`db`パッケージ側で取り込む（4章参照）。`auth`パッケージ自体はスキーマ/マイグレーションを持たない。
 
-## 6. `cli`パッケージ（新しいセットの雛形生成）
+## 6. `cli`パッケージ（アプリ雛形・セット雛形の生成）
 
-問題の追加は「MDファイルを書く」だけなので編集UIは不要。代わりに、新しいセットを始める際の定型作業(ファイル作成・テーブルヘッダー・frontmatter)をCLIで省略する。
+問題の追加は「MDファイルを書く」だけなので編集UIは不要。代わりに、定型作業(アプリの初期セットアップ、新しいセットのファイル作成・テーブルヘッダー・frontmatter)をCLIで省略する。
 
-- コマンド: `quiz new <セット名>`
-- 動作: `content/questions/<セット名>.md`を生成し、`title` frontmatterと空のテーブルヘッダー(`id | question | answer | explanation`)を書き込む。
-- `id`の接頭辞はセット名から機械的に導出する(例: `react-hooks` → `react-hooks-001`のような採番はしない。`id`は利用者が自由に書く欄のままにし、CLIは雛形の提示に留める。過剰な自動化はしない)。
+### `quiz create <app名>`
+
+- `packages/templates/default`(実在するワークスペースパッケージ。`@quiz/core`/`@quiz/auth`/`@quiz/db`に実際に依存し、自身の型が通ることを保証している)を新しいディレクトリにコピーする。
+- `package.json`の`name`フィールドと`wrangler.toml`のアプリ名プレースホルダーを、指定したapp名に置き換える。
+- `node_modules`/`dist`/`.wrangler`はコピー対象から除外する。
+- 既にディレクトリが存在する場合はエラーにして上書きしない。
+
+### `quiz new <セット名>`
+
+- `content/questions/<セット名>.md`を生成し、`title` frontmatterと空のテーブルヘッダー(`id | question | answer | explanation`)を書き込む。
+- **セット名はサブディレクトリを含んでよい**(例: `english/part1` → `content/questions/english/part1.md`。ディレクトリが無ければ自動作成する)。frontmatterの`title`にはセット名の最後の階層(`part1`)を使う。
+- `id`の接頭辞はセット名から機械的に導出しない(`react-hooks` → `react-hooks-001`のような採番はしない)。`id`は利用者が自由に書く欄のままにし、CLIは雛形の提示に留める。過剰な自動化はしない。
+- 先頭が`/`のセット名や`..`を含むセット名は拒否する(意図しないパスへの書き込み防止)。
 - 既存ファイルと同名の場合は上書きせずエラーにする。
+
+### 実装方針
+
+- CLIフレームワーク(commander等)は使わない。サブコマンドは2つ、引数も1つずつなので`process.argv`の手書き解析で十分。
+- テンプレートコピーは`fs.cpSync(src, dest, { recursive: true, filter })`(Node組み込み)を使い、自前の再帰コピー処理を書かない。
+- Node 24のネイティブTypeScript実行(`node src/index.ts`)でそのまま動く。相対importには`.ts`拡張子を明示する(Node ESMの解決はTypeScriptと違い拡張子省略を許さないため)。
 
 ## 7. `app`側に必要なもの（最小限）
 

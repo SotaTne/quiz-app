@@ -4,6 +4,8 @@ export type { Attempt, Mode } from "./domain/attempt";
 export { buildQuestionSet } from "./content/build-question-set";
 export type { BuildQuestionSetResult } from "./content/build-question-set";
 
+export { deriveSetId } from "./content/derive-set-id";
+
 export { generateDistractors } from "./distractors/generate-distractors";
 
 export { applyFilter } from "./filters/apply-filter";
