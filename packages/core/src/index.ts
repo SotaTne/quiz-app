@@ -23,3 +23,12 @@ export { attempts } from "./schema";
 
 export { createStore } from "./store";
 export type { Database, RecordAttemptInput, Store } from "./store";
+
+export { SetListView } from "./pages/set-list-view";
+export type { SetListViewProps, SetSummary } from "./pages/set-list-view";
+
+export { FlashcardView } from "./pages/flashcard-view";
+export type { FlashcardViewProps } from "./pages/flashcard-view";
+
+export { FourChoiceView } from "./pages/four-choice-view";
+export type { FourChoiceViewProps } from "./pages/four-choice-view";

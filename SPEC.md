@@ -27,7 +27,9 @@ quiz-app/
         vite-plugin/           # quizContentPlugin(): content -> virtual:quiz-content
         distractors/           # 4択の誤答生成ロジック
         filters/                # 出題フィルタ (全問 / 苦手問題のみ)
-        pages/                 # waku(RSC)向けページ/コンポーネント (flashcard/4択/セット一覧、カスタマイズ可能)
+        pages/                 # プレゼンテーション用コンポーネント: SetListView(Server)/FlashcardView・FourChoiceView(Client)
+                                 # データ取得(virtual:quiz-content読み込み・習熟度集計)やwaku createPagesでの実際のルート登録は
+                                 # まだ実装していない(actions/submitAnswerが揃ってから配線する。9章参照)
         actions/                # waku Server Action: submitAnswer（1問ごと即時、authに直接依存）
         schema.ts               # 公開Drizzleスキーマ (attempts)
         store.ts                 # スキーマに対応するStore実装 (createStore)
