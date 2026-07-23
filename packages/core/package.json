@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@quiz/auth": "workspace:*",
-    "drizzle-orm": "^0.45.2"
+    "drizzle-orm": "^0.45.2",
+    "vite": "6.4.3"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",

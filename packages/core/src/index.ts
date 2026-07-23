@@ -6,6 +6,12 @@ export type { BuildQuestionSetResult } from "./content/build-question-set";
 
 export { deriveSetId } from "./content/derive-set-id";
 
+export { loadQuestionSets } from "./content/load-question-sets";
+export type { LoadQuestionSetsResult } from "./content/load-question-sets";
+
+export { quizContentPlugin } from "./vite-plugin";
+export type { QuizContentPluginOptions } from "./vite-plugin";
+
 export { generateDistractors } from "./distractors/generate-distractors";
 
 export { applyFilter } from "./filters/apply-filter";
