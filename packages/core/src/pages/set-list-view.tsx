@@ -1,5 +1,6 @@
-import { Badge, Card, Group, Progress, Stack, Text } from "@mantine/core";
+import { Badge, Card, Group, Stack, Text } from "@mantine/core";
 import type { QuestionSet } from "../domain/question.ts";
+import { accuracyColor } from "./accuracy-color.ts";
 
 export type SetSummary = {
   set: QuestionSet;
@@ -22,15 +23,9 @@ function MasteryBadge({ label, percent }: { label: string; percent: number | nul
     );
   }
   return (
-    <Group gap={6} wrap="nowrap">
-      <Text size="xs" c="dimmed">
-        {label}
-      </Text>
-      <Progress value={percent} w={50} size="sm" radius="xl" />
-      <Text size="sm" c="dimmed">
-        {percent}%
-      </Text>
-    </Group>
+    <Badge color={accuracyColor(percent)} variant="light">
+      {label}: {percent}%
+    </Badge>
   );
 }
 
