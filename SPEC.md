@@ -52,6 +52,7 @@ quiz-app/
         waku.config.ts             # quizContentPluginをここで直接登録する
         wrangler.toml
         content/questions/example.md
+  apps/                       # デプロイ対象(packages/はライブラリ・ツール)
     app/                      # 利用者側(自分の本番アプリ)。`quiz create`で生成し、core/db/authを組み立てるだけ
       content/questions/**/*.md   # サブディレクトリでセットを分類可能(例: english/part1.md)
       waku.config.ts
@@ -311,7 +312,7 @@ export default adapter(pages);
 
 ## 10. ドキュメントサイト（docsを一つのプロダクトとして）
 
-- `packages/docs`としてmonorepo内に独立させ、Cloudflare Pagesに別デプロイする（本体アプリとは別サイト）。
+- `apps/docs`としてmonorepo内に独立させ、Cloudflare Pagesに別デプロイする（本体アプリとは別サイト）。
 - フレームワーク: **Astro Starlight**
   - Mermaid対応が`astro-mermaid`という活発にメンテされているプラグインで実現でき、VitePress側の`vitepress-plugin-mermaid`（依存崩壊で動作不安定）より安定
   - `astro-mermaid`はCloudflare公式ドキュメントサイト自体が採用しているパターンをベースにしており、「Cloudflareで動くMermaid対応の静的ドキュメント」の実績として最適

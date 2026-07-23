@@ -37,7 +37,7 @@ graph TD
     end
     Migrate --> D1
 
-    subgraph Docs["packages/docs (別デプロイ)"]
+    subgraph Docs["apps/docs (別デプロイ)"]
         Starlight["Astro Starlight静的サイト"]
     end
     Repo -->|push main| Starlight
@@ -57,8 +57,8 @@ graph TD
     Root --> Auth["packages/auth<br/>(better-auth設定、自分用)"]
     Root --> Cli["packages/cli<br/>(アプリ雛形・セット雛形の生成)"]
     Root --> Templates["packages/templates/default<br/>(quiz createがコピーする実パッケージ)"]
-    Root --> App["packages/app<br/>(自分の本番アプリ)"]
-    Root --> Docs["packages/docs<br/>(Astro Starlight)"]
+    Root --> App["apps/app<br/>(自分の本番アプリ)"]
+    Root --> Docs["apps/docs<br/>(Astro Starlight)"]
 
     Core --> C1["content/ MDパーサー・スキーマ検証・deriveSetId()"]
     Core --> C2["vite-plugin/ 仮想モジュール化"]
