@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "waku dev",
+    "dev": "waku dev --port 3000",
     "build": "waku build",
+    "start": "waku start --port 3000",
     "typecheck": "tsc --noEmit",
     "db:migrate": "wrangler d1 migrations apply DB"
   },
