@@ -6,7 +6,7 @@ import { getQuizContext } from "~/quiz-context";
 import type { Route } from "./+types/set";
 
 export async function loader({ request, context, params }: Route.LoaderArgs) {
-  const { store, auth } = getQuizContext(context.get(cloudflareContext).env);
+  const { store, auth } = getQuizContext(context.get(cloudflareContext).env, request);
   return loadSetData({ request, store, auth, questionSets, setId: params["*"] });
 }
 

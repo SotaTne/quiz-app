@@ -6,7 +6,7 @@ import { getQuizContext } from "~/quiz-context";
 import type { Route } from "./+types/home";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
-  const { store, auth } = getQuizContext(context.get(cloudflareContext).env);
+  const { store, auth } = getQuizContext(context.get(cloudflareContext).env, request);
   return loadHomeData({ request, store, auth, questionSets });
 }
 

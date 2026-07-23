@@ -1,4 +1,4 @@
-name = "app"
+name = 'quiz-app'
 main = "./workers/app.ts"
 compatibility_date = "2026-01-01"
 compatibility_flags = ["nodejs_compat"]
@@ -10,6 +10,6 @@ database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
 # マイグレーションファイルはこのapp自身の./migrations配下に閉じて持つ(drizzle.config.ts参照)。
 
 [vars]
-BETTER_AUTH_URL = "http://localhost:3000"
 # 秘密情報・個人情報(BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, ALLOWED_EMAILS)は
 # .dev.vars(ローカル)/`wrangler secret put`(本番)で渡す。wrangler.tomlには書かない(公開リポジトリのため)。
+# BETTER_AUTH_URLは環境変数として持たず、リクエストのオリジンから毎回算出する(quiz-context.ts参照)。

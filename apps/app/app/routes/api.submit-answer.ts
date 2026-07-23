@@ -4,6 +4,6 @@ import { getQuizContext } from "~/quiz-context";
 import type { Route } from "./+types/api.submit-answer";
 
 export async function action({ request, context }: Route.ActionArgs) {
-  const { store, auth } = getQuizContext(context.get(cloudflareContext).env);
+  const { store, auth } = getQuizContext(context.get(cloudflareContext).env, request);
   return submitAnswer(request, { store, auth });
 }
