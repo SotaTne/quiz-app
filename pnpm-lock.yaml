@@ -75,8 +75,14 @@ importers:
         version: link:../auth
       drizzle-orm:
         specifier: ^0.36.4
-        version: 0.36.4(kysely@0.29.4)(react@19.2.8)
+        version: 0.36.4(@types/better-sqlite3@7.6.13)(better-sqlite3@13.0.1)(kysely@0.29.4)(react@19.2.8)
     devDependencies:
+      '@types/better-sqlite3':
+        specifier: ^7.6.13
+        version: 7.6.13
+      better-sqlite3:
+        specifier: ^13.0.1
+        version: 13.0.1
       typescript:
         specifier: ^7.0.0
         version: 7.0.2
@@ -94,7 +100,7 @@ importers:
         version: link:../core
       drizzle-orm:
         specifier: ^0.36.4
-        version: 0.36.4(kysely@0.29.4)(react@19.2.8)
+        version: 0.36.4(@types/better-sqlite3@7.6.13)(better-sqlite3@13.0.1)(kysely@0.29.4)(react@19.2.8)
     devDependencies:
       drizzle-kit:
         specifier: ^0.28.1
@@ -1833,6 +1839,9 @@ packages:
   '@types/babel__traverse@7.28.0':
     resolution: {integrity: sha512-8PvcXf70gTDZBgt9ptxJ8elBeBjcLOAcOtoO/mPJjtji1+CdGbHgm77om1GrsPxsiE+uXIpNSK64UYaIwQXd4Q==}
 
+  '@types/better-sqlite3@7.6.13':
+    resolution: {integrity: sha512-NMv9ASNARoKksWtsq/SHakpYAYnhBrQgGD8zkLYk/jaK8jUGn08CfEdTRgYhMypUQAfzSP8W6gNLe0q19/t4VA==}
+
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
 
@@ -2396,6 +2405,10 @@ packages:
     peerDependenciesMeta:
       zod:
         optional: true
+
+  better-sqlite3@13.0.1:
+    resolution: {integrity: sha512-LYpmOXdkpQYf4wmlxkdzW01XGlOXNIbjLg45yNkh0FQ4814VbK9PdOFmhZpYbej+EZtR/i3FDdhEG98HqZdgnA==}
+    engines: {node: '>=22'}
 
   blake3-wasm@2.1.5:
     resolution: {integrity: sha512-F1+K8EbfOZE49dtoPtmxUQrpXaBIl3ICvasLh+nJta0xkz+9kF/7uet9fLnwKqhDrmj6g+6K3Tw9yQPUg2ka5g==}
@@ -3579,6 +3592,10 @@ packages:
 
   nlcst-to-string@4.0.0:
     resolution: {integrity: sha512-YKLBCcUYKAg0FNlOBT6aI91qFmSiFKiluk655WzPF+DDMA02qIyy8uiRqI8QXtcFpEvll12LpL5MXqEmAZ+dcA==}
+
+  node-addon-api@8.9.0:
+    resolution: {integrity: sha512-ekZMeaaIzSQTSpr7X2X3iJM7lTzgnx8ahAG9pJfT/7+14mlEM8ZYQ9cgCDvSSRbReFK0oHli3WrZdCiRsgAT9Q==}
+    engines: {node: ^18 || ^20 || >= 21}
 
   node-fetch-native@1.6.7:
     resolution: {integrity: sha512-g9yhqoedzIUm0nTnTqAQvueMPVOuIY16bqgAJJC8XOOubYFNwz6IER9qs0Gq2Xd0+CecCKFjtdDTMA4u4xG06Q==}
@@ -5726,6 +5743,10 @@ snapshots:
     dependencies:
       '@babel/types': 7.29.7
 
+  '@types/better-sqlite3@7.6.13':
+    dependencies:
+      '@types/node': 26.1.1
+
   '@types/chai@5.2.3':
     dependencies:
       '@types/deep-eql': 4.0.2
@@ -6342,6 +6363,10 @@ snapshots:
     optionalDependencies:
       zod: 4.4.3
 
+  better-sqlite3@13.0.1:
+    dependencies:
+      node-addon-api: 8.9.0
+
   blake3-wasm@2.1.5: {}
 
   boolbase@1.0.0: {}
@@ -6737,8 +6762,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.36.4(kysely@0.29.4)(react@19.2.8):
+  drizzle-orm@0.36.4(@types/better-sqlite3@7.6.13)(better-sqlite3@13.0.1)(kysely@0.29.4)(react@19.2.8):
     optionalDependencies:
+      '@types/better-sqlite3': 7.6.13
+      better-sqlite3: 13.0.1
       kysely: 0.29.4
       react: 19.2.8
 
@@ -7899,6 +7926,8 @@ snapshots:
   nlcst-to-string@4.0.0:
     dependencies:
       '@types/nlcst': 2.0.3
+
+  node-addon-api@8.9.0: {}
 
   node-fetch-native@1.6.7: {}
 

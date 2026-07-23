@@ -10,3 +10,11 @@ export { applyFilter } from "./filters/apply-filter";
 export type { FilterType } from "./filters/apply-filter";
 
 export { checkAnswer } from "./grading/check-answer";
+
+export { attempts } from "./schema";
+
+export { createStore } from "./store";
+export type { Database, RecordAttemptInput, Store } from "./store";
+
+export { defineQuizConfig } from "./config";
+export type { DefineQuizConfigInput, QuizConfig } from "./config";
