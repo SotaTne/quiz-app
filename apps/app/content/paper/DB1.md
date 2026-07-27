@@ -329,21 +329,21 @@ $$
 3年生の行：
 
 $$
-\sigma_{\text{学年}=3}(\text{学生})
+\sigma_{\scriptstyle \text{学年}=3}(\text{学生})
 $$
 
 学籍番号と氏名の列：
 
 $$
-\pi_{\text{学籍番号},\,\text{氏名}}(\text{学生})
+\pi_{\scriptstyle \text{学籍番号},\,\text{氏名}}(\text{学生})
 $$
 
 情報学部学生の氏名：
 
 $$
-\pi_{\text{氏名}}
+\pi_{\scriptstyle \text{氏名}}
 \left(
-  \sigma_{\text{学部}=\text{`情報'}}(\text{学生})
+  \sigma_{\scriptstyle \text{学部}=\text{`情報'}}(\text{学生})
 \right)
 $$
 
@@ -377,7 +377,9 @@ $$
 $$
 
 $$
-R\bowtie_\theta S=\sigma_\theta(R\times S)
+R\bowtie_{\scriptstyle \theta}S
+=
+\sigma_{\scriptstyle \theta}(R\times S)
 $$
 
 ### 等結合
@@ -438,24 +440,24 @@ $$
 関係$R$を$S$へ変更：
 
 $$
-\rho_S(R)
+\rho_{\scriptstyle S}(R)
 $$
 
 同じ社員関係を部下役・上司役に分ける：
 
 $$
-\rho_{\text{部下}}(\text{社員})
+\rho_{\scriptstyle \text{部下}}(\text{社員})
 $$
 
 $$
-\rho_{\text{上司}}(\text{社員})
+\rho_{\scriptstyle \text{上司}}(\text{社員})
 $$
 
 自己結合：
 
 $$
 \text{部下}
-\bowtie_{\text{部下.上司番号}=\text{上司.社員番号}}
+\bowtie_{\scriptstyle \text{部下.上司番号}=\text{上司.社員番号}}
 \text{上司}
 $$
 
@@ -464,9 +466,9 @@ $$
 「工学部学生の学籍番号と氏名」なら、内側から結合→選択→射影。
 
 $$
-\pi_{\text{学籍番号},\,\text{氏名}}
+\pi_{\scriptstyle \text{学籍番号},\,\text{氏名}}
 \left(
-  \sigma_{\text{学部名}=\text{`工学部'}}
+  \sigma_{\scriptstyle \text{学部名}=\text{`工学部'}}
   \left(
     \text{学生}\bowtie\text{学部}
   \right)
@@ -1296,9 +1298,9 @@ GRANT SELECT ON EMPVIEW TO generic;
 ### 解答
 
 $$
-\pi_{\text{学籍番号},\,\text{氏名}}
+\pi_{\scriptstyle \text{学籍番号},\,\text{氏名}}
 \left(
-  \sigma_{\text{学部名}=\text{`情報学部'}}
+  \sigma_{\scriptstyle \text{学部名}=\text{`情報学部'}}
   \left(
     \text{学生}\bowtie\text{学部}
   \right)
@@ -1523,3 +1525,361 @@ FROM 学生 NATURAL JOIN 学部;
 7. SELECT AVG(成績)
 8. ORDER BY 成績 DESC
 ```
+
+---
+
+# 試験基準演習：関係代数とSQL
+
+講義で繰り返し扱われた供給元データベースを使う。まず問題を関係代数で解き、その後にSQLで書き直せるようにする。
+
+```text
+S（S#, SNAME, STATUS, SCITY）
+P（P#, PNAME, COLOR, WEIGHT, PCITY）
+SP（S#, P#, QTY）
+```
+
+- `S`：供給元
+- `P`：部品
+- `SP`：供給元と部品の現在の供給関係
+
+## 試験問題1 現在供給されている部品
+
+誰かによって供給されている部品番号を求めよ。
+
+### 関係代数
+
+$$
+\pi_{\scriptstyle P\#}(SP)
+$$
+
+### SQL
+
+```sql
+SELECT DISTINCT P#
+FROM SP;
+```
+
+### 採点ポイント
+
+`P`ではなく`SP`を見る。`P`には現在供給されていない部品や廃盤部品も含まれ得るが、`SP`には実際の供給関係が記録される。
+
+## 試験問題2 部品番号と供給元都市
+
+誰かによって供給されている部品番号と、その供給元の所在都市を求めよ。
+
+### 関係代数
+
+$$
+\pi_{\scriptstyle P\#,\,SCITY}
+\left(
+  SP\bowtie_{\scriptstyle SP.S\#=S.S\#}S
+\right)
+$$
+
+### SQL
+
+```sql
+SELECT DISTINCT SP.P#, S.SCITY
+FROM SP
+JOIN S
+  ON SP.S# = S.S#;
+```
+
+### 採点ポイント
+
+- `SCITY`は部品`P`ではなく、供給元`S`の属性。
+- 同じ部品・都市の組が複数供給元から出る可能性があるので`DISTINCT`を付ける。
+
+## 試験問題3 同じ都市の供給元ペア
+
+同じ都市にある相異なる供給元番号のペアを、逆順重複なしで求めよ。
+
+### 関係代数
+
+$$
+\pi_{\scriptstyle FIRST.S\#,\,SECOND.S\#}
+\left(
+  \sigma_{\scriptstyle
+    FIRST.SCITY=SECOND.SCITY
+    \,\land\,
+    FIRST.S\#>SECOND.S\#
+  }
+  \left(
+    \rho_{\scriptstyle FIRST}(S)
+    \times
+    \rho_{\scriptstyle SECOND}(S)
+  \right)
+\right)
+$$
+
+### SQL
+
+```sql
+SELECT FIRST.S#, SECOND.S#
+FROM S FIRST
+JOIN S SECOND
+  ON FIRST.SCITY = SECOND.SCITY
+WHERE FIRST.S# > SECOND.S#;
+```
+
+### 採点ポイント
+
+`FIRST.S# <> SECOND.S#`だけでは、
+
+```text
+(s1, s2)
+(s2, s1)
+```
+
+が両方残る。`>`または`<`なら、自分自身と逆順重複を同時に除ける。講義で「よく引っかかる」と強調された問題。
+
+## 試験問題4 部品p2を供給する供給元
+
+部品`p2`を供給している供給元名を求めよ。
+
+### 関係代数
+
+$$
+\pi_{\scriptstyle SNAME}
+\left(
+  \sigma_{\scriptstyle P\#=\text{`p2'}}
+  \left(
+    S\bowtie SP
+  \right)
+\right)
+$$
+
+### SQL：入れ子型
+
+```sql
+SELECT SNAME
+FROM S
+WHERE S# IN (
+  SELECT S#
+  FROM SP
+  WHERE P# = 'p2'
+);
+```
+
+### SQL：結合
+
+```sql
+SELECT DISTINCT SNAME
+FROM S
+NATURAL JOIN SP
+WHERE P# = 'p2';
+```
+
+### 採点ポイント
+
+`p2`は部品番号なので`P# = 'p2'`。`PNAME = 'p2'`ではない。
+
+## 試験問題5 赤い部品を供給する供給元
+
+赤い部品を少なくとも1種類供給している供給元名を求めよ。
+
+### 関係代数
+
+$$
+\pi_{\scriptstyle SNAME}
+\left(
+  S
+  \bowtie
+  SP
+  \bowtie
+  \sigma_{\scriptstyle COLOR=\text{`Red'}}(P)
+\right)
+$$
+
+### SQL
+
+```sql
+SELECT SNAME
+FROM S
+WHERE S# IN (
+  SELECT S#
+  FROM SP
+  WHERE P# IN (
+    SELECT P#
+    FROM P
+    WHERE COLOR = 'Red'
+  )
+);
+```
+
+### 処理順
+
+```text
+赤い部品のP#を求める
+→ そのP#を供給するS#を求める
+→ そのS#のSNAMEを求める
+```
+
+## 試験問題6 s2と共通の部品を供給する供給元
+
+供給元`s2`が供給する部品のうち、少なくとも1つを供給している供給元番号を求めよ。
+
+### 関係代数
+
+$$
+\pi_{\scriptstyle S\#}
+\left(
+  SP
+  \bowtie
+  \pi_{\scriptstyle P\#}
+  \left(
+    \sigma_{\scriptstyle S\#=\text{`s2'}}(SP)
+  \right)
+\right)
+$$
+
+### SQL
+
+```sql
+SELECT DISTINCT S#
+FROM SP
+WHERE P# IN (
+  SELECT P#
+  FROM SP
+  WHERE S# = 's2'
+);
+```
+
+### 注意
+
+この条件では`s2`自身も結果に入り得る。問題が「s2以外」を要求するなら、外側に次を追加する。
+
+```sql
+AND S# <> 's2'
+```
+
+## 試験問題7 2社以上が供給する部品
+
+2つ以上の異なる供給元によって供給されている部品番号を求めよ。
+
+### SQL：GROUP BY
+
+```sql
+SELECT P#
+FROM SP
+GROUP BY P#
+HAVING COUNT(*) > 1;
+```
+
+### SQL：相関入れ子質問
+
+```sql
+SELECT DISTINCT SPX.P#
+FROM SP SPX
+WHERE SPX.P# IN (
+  SELECT P#
+  FROM SP
+  WHERE S# <> SPX.S#
+);
+```
+
+### 相関の読み方
+
+外側の現在の`SPX`行について、同じ部品を供給する別の`S#`の行が内側に存在するか調べる。
+
+## 試験問題8 p2を供給していない供給元
+
+部品`p2`を供給していない供給元名を求めよ。
+
+### SQL：NOT EXISTS
+
+```sql
+SELECT SNAME
+FROM S
+WHERE NOT EXISTS (
+  SELECT *
+  FROM SP
+  WHERE SP.S# = S.S#
+    AND SP.P# = 'p2'
+);
+```
+
+### SQL：NOT IN
+
+```sql
+SELECT SNAME
+FROM S
+WHERE S# NOT IN (
+  SELECT S#
+  FROM SP
+  WHERE P# = 'p2'
+);
+```
+
+### 引っかけ
+
+単に、
+
+```sql
+SELECT SNAME
+FROM S NATURAL JOIN SP
+WHERE P# <> 'p2';
+```
+
+としてはいけない。ある供給元が`p2`と別部品の両方を供給していれば、別部品の行によって誤って結果に残る。
+
+## 試験問題9 OR条件を集合演算で表す
+
+重量が18より重い、または供給元`s2`によって供給されている部品番号を求めよ。
+
+### 関係代数
+
+$$
+\pi_{\scriptstyle P\#}
+\left(
+  \sigma_{\scriptstyle WEIGHT>18}(P)
+\right)
+\cup
+\pi_{\scriptstyle P\#}
+\left(
+  \sigma_{\scriptstyle S\#=\text{`s2'}}(SP)
+\right)
+$$
+
+### SQL
+
+```sql
+SELECT P#
+FROM P
+WHERE WEIGHT > 18
+UNION
+SELECT P#
+FROM SP
+WHERE S# = 's2';
+```
+
+## 試験問題10 GROUP BYとHAVING
+
+次の関係`R(A,B,C,D)`に対して、
+
+```sql
+SELECT B, AVG(C)
+FROM R
+GROUP BY B
+HAVING SUM(D) >= 100;
+```
+
+の処理を説明せよ。
+
+### 解答の型
+
+1. `B`が同じ行をグループ化する。
+2. 各グループで`SUM(D)`を計算する。
+3. 合計が100以上のグループだけを残す。
+4. 残った各グループについて`B`と`AVG(C)`を出力する。
+
+## 仕上げチェック
+
+以下を、何も見ずに書ければSQL・関係代数の試験対策としてかなり強い。
+
+- `p2`を供給する供給元：結合版と入れ子版
+- 赤い部品を供給する供給元：二重入れ子
+- 2社以上が供給する部品：相関版と`GROUP BY`版
+- `p2`を供給しない供給元：`NOT EXISTS`
+- 同じ都市のペア：自己結合と`>`
+- OR条件：和演算と`UNION`
