@@ -3,6 +3,7 @@ import type { Mode } from "../domain/attempt.ts";
 import type { Question } from "../domain/question.ts";
 import type { FilterType } from "../filters/apply-filter.ts";
 import { accuracyColor } from "./accuracy-color.ts";
+import { QuizText } from "./quiz-text.tsx";
 
 export type QuestionAccuracyStat = { total: number; correct: number } | null;
 
@@ -84,7 +85,7 @@ export function QuestionListView({
               >
                 <Group justify="space-between" wrap="nowrap">
                   <Text size="sm" style={{ flex: 1 }} lineClamp={1}>
-                    {question.question}
+                    <QuizText text={question.question} />
                   </Text>
                   <StatusBadge stat={accuracyOf(question.id)} />
                 </Group>

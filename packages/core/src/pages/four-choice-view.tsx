@@ -1,5 +1,6 @@
 import { Button, Card, SimpleGrid, Text } from "@mantine/core";
 import type { Question } from "../domain/question.ts";
+import { QuizText } from "./quiz-text.tsx";
 
 export type FourChoiceViewProps = {
   question: Question;
@@ -13,12 +14,12 @@ export function FourChoiceView({ question, choices, onAnswer }: FourChoiceViewPr
   return (
     <Card withBorder radius="md" padding="xl">
       <Text ta="center" size="lg" fw={500} mb="lg">
-        {question.question}
+        <QuizText text={question.question} />
       </Text>
       <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
         {choices.map((choice) => (
           <Button key={choice} variant="light" color="gray" onClick={() => onAnswer(choice)} h="auto" py="sm">
-            {choice}
+            <QuizText text={choice} />
           </Button>
         ))}
       </SimpleGrid>
