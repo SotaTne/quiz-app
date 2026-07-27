@@ -20,12 +20,19 @@
     "@mantine/hooks": "9.4.2",
     "@quiz/auth": "workspace:*",
     "drizzle-orm": "^0.45.2",
+    "katex": "^0.18.1",
+    "mermaid": "^11.16.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.2",
     "@types/better-sqlite3": "^7.6.13",
+    "@types/katex": "^0.16.8",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

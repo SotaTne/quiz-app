@@ -1,7 +1,7 @@
-import { Group, Stack, Text } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
+import { AppNavigation } from "./app-navigation.tsx";
 import type { HomeData } from "./load-home-data.ts";
 import { LoginButton } from "./login-button.tsx";
-import { LogoutButton } from "./logout-button.tsx";
 import { SetListView } from "./set-list-view.tsx";
 
 export type HomePageProps = {
@@ -21,9 +21,7 @@ export function HomePage({ data }: HomePageProps) {
 
   return (
     <Stack gap="lg">
-      <Group justify="flex-end">
-        <LogoutButton />
-      </Group>
+      <AppNavigation active="quiz" />
       <SetListView sets={data.sets} />
     </Stack>
   );

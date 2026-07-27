@@ -36,6 +36,34 @@ title: セットのタイトル
 
 `pnpm dev` を起動した状態でファイルを保存すると、ホットリロードで一覧に反映される。
 
+# カンペの追加方法
+
+`content/paper/` 配下の `.md` / `.mmd` が、ログイン後の「カンペ」に表示される。
+
+````markdown
+---
+title: 試験用カンペ
+description: 要点まとめ
+order: 10
+---
+
+インライン数式: $E = mc^2$
+
+$$
+\int_0^1 x^2 dx
+$$
+
+```mermaid
+flowchart LR
+  A --> B
+```
+````
+
+- GFM、KaTeX数式、`mermaid` / `mmd` コードブロックに対応
+- `.mmd` はfrontmatterより後ろの本文全体をMermaid図として扱う
+- `title`は必須、`description`と`order`は任意
+- 相対パスがURLになる（`paper/ca/final.md` → `/paper/ca/final`）
+
 # フォルダ構成
 
 ```
@@ -48,6 +76,7 @@ apps/app/
 │   └── quiz-context.ts      # env(D1・secrets)からstore/authを組み立てる
 ├── workers/app.ts           # Cloudflare Workersのエントリポイント
 ├── content/questions/       # ここにMarkdownを置くとセットになる(このREADMEの本題)
+├── content/paper/           # Markdown/Mermaid形式のカンペ
 ├── migrations/              # D1のマイグレーション(`pnpm db:generate`で生成)
 ├── drizzle.config.ts        # マイグレーション生成の設定(スキーマ定義自体は@quiz/dbが持つ)
 ├── wrangler.toml            # Cloudflare Workersの設定(D1バインディング等)

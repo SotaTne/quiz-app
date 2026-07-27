@@ -36,6 +36,38 @@ title: セットのタイトル
 
 `pnpm dev` を起動した状態でファイルを保存すると、ホットリロードで一覧に反映される。
 
+# カンペの追加方法
+
+`content/paper/` 配下に `.md` または `.mmd` ファイルを置くと、ログイン後の「カンペ」から閲覧できる。
+
+````markdown
+---
+title: ソフトウェア工学 カンペ
+description: 期末試験用まとめ
+order: 10
+---
+
+# 開発モデル
+
+インライン数式は $E = mc^2$、ブロック数式は次のように書く。
+
+$$
+\int_0^1 x^2 dx
+$$
+
+```mermaid
+flowchart LR
+  A[要件] --> B[設計]
+```
+````
+
+- GitHub Flavored Markdown（表、取り消し線、タスクリストなど）に対応
+- Mermaidは `mermaid` または `mmd` のコードブロックに対応
+- `.mmd` ファイルはfrontmatterより後ろの本文全体をMermaid図として扱う
+- `title`は必須、`description`と`order`は任意
+- ファイルの相対パスがURLになる（例: `paper/ca/final.md` → `/paper/ca/final`）
+- Markdown内の生HTMLは実行しない
+
 # フォルダ構成
 
 ```
@@ -48,6 +80,7 @@ apps/app/
 │   └── quiz-context.ts      # env(D1・secrets)からstore/authを組み立てる
 ├── workers/app.ts           # Cloudflare Workersのエントリポイント
 ├── content/questions/       # ここにMarkdownを置くとセットになる(このREADMEの本題)
+├── content/paper/           # Markdown/Mermaid形式のカンペ
 ├── migrations/              # D1のマイグレーション(`pnpm db:generate`で生成)
 ├── drizzle.config.ts        # マイグレーション生成の設定(スキーマ定義自体は@quiz/dbが持つ)
 ├── wrangler.toml            # Cloudflare Workersの設定(D1バインディング等)
@@ -65,3 +98,15 @@ apps/app/
 | `pnpm db:generate` | スキーマ変更からマイグレーションファイルを生成 |
 | `pnpm db:migrate` | ローカルD1にマイグレーションを適用 |
 | `pnpm typecheck` | 型チェック |
+
+## データについて
+
+これは、gitで管理されないが
+
+data/~に置かれる。
+
+コンピュータアーキテクチャ(CA)の場合
+data/CA/01/*.mdがその対象となる。
+
+また、CAには、note.md,words.md,video.mdの3種類があり、基本はnote.mdとwords.mdを使う。
+不明瞭な箇所は授業とかでないということだから自分で検索して、note.mdを改良すること

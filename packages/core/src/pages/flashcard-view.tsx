@@ -1,6 +1,7 @@
 import { Button, Card, Group, Text } from "@mantine/core";
 import { useRef, useState } from "react";
 import type { Question } from "../domain/question.ts";
+import { QuizText } from "./quiz-text.tsx";
 
 export type FlashcardViewProps = {
   question: Question;
@@ -71,11 +72,11 @@ export function FlashcardView({ question, onAnswer }: FlashcardViewProps) {
       }}
     >
       <Text ta="center" size="lg" fw={500} style={{ userSelect: "text" }}>
-        {flipped ? question.answer : question.question}
+        <QuizText text={flipped ? question.answer : question.question} />
       </Text>
       {flipped && question.explanation && (
         <Text ta="center" size="sm" c="dimmed" mt="sm" style={{ userSelect: "text" }}>
-          {question.explanation}
+          <QuizText text={question.explanation} />
         </Text>
       )}
       <Group justify="center" gap="xl" mt="lg">

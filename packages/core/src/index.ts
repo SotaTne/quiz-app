@@ -5,6 +5,7 @@
 // (実際にブラウザで踏んだ不具合: derive-set-id.tsのnode:pathアクセスがクライアントで例外)。
 
 export type { Question, QuestionSet } from "./domain/question.ts";
+export type { Paper } from "./domain/paper.ts";
 export type { Attempt, Mode } from "./domain/attempt.ts";
 
 // quizContentPlugin(vite設定の読み込み時にしか使わない、node:fs/node:pathに触れる)は
@@ -38,3 +39,6 @@ export type { HomePageProps } from "./pages/home-page.tsx";
 
 export { SetPage } from "./pages/set-page.tsx";
 export type { SetPageProps } from "./pages/set-page.tsx";
+
+export { PaperListPage } from "./pages/paper-list-page.tsx";
+export { PaperPage } from "./pages/paper-page.tsx";

@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { quizContentPlugin } from "./index.ts";
+import { paperContentPlugin, quizContentPlugin } from "./index.ts";
 
 type ResolveIdFn = (id: string) => string | undefined;
 type LoadFn = (id: string) => string | undefined;
@@ -54,5 +54,17 @@ describe("quizContentPlugin", () => {
     const load = plugin.load as LoadFn;
 
     expect(() => load("\0virtual:quiz-content")).toThrow();
+  });
+});
+
+describe("paperContentPlugin", () => {
+  it("virtual:paper-contentをPaper[]入りのモジュールにする", () => {
+    writeFileSync(join(contentDir, "paper.md"), "---\ntitle: カンペ\n---\n\n# 本文");
+    const plugin = paperContentPlugin({ contentDir });
+    const resolveId = plugin.resolveId as ResolveIdFn;
+    const load = plugin.load as LoadFn;
+
+    expect(resolveId("virtual:paper-content")).toBe("\0virtual:paper-content");
+    expect(load("\0virtual:paper-content")).toContain('"title":"カンペ"');
   });
 });

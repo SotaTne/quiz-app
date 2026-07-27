@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import type { QuestionSet } from "../domain/question.ts";
 import { buildQuestionSet } from "./build-question-set.ts";
@@ -19,6 +19,8 @@ function findMarkdownFiles(dir: string): string[] {
  * `id`の重複は(CIのバリデーションと同じく)全ファイル横断でチェックする。
  */
 export function loadQuestionSets(contentDir: string): LoadQuestionSetsResult {
+  if (!existsSync(contentDir)) return { ok: true, data: [] };
+
   const errors: string[] = [];
   const sets: QuestionSet[] = [];
   const seenQuestionIds = new Set<string>();

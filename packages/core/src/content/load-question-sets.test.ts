@@ -21,6 +21,12 @@ function writeSet(relativePath: string, markdown: string): void {
 }
 
 describe("loadQuestionSets", () => {
+  it("contentDirが存在しない場合は空のセット一覧を返す", () => {
+    const result = loadQuestionSets(join(contentDir, "missing"));
+
+    expect(result).toEqual({ ok: true, data: [] });
+  });
+
   it("フラットな複数の.mdファイルをQuestionSet[]に変換する", () => {
     writeSet("set1.md", "| id | question | answer |\n|----|----------|--------|\n| a | q1 | x |\n");
     writeSet("set2.md", "| id | question | answer |\n|----|----------|--------|\n| b | q2 | y |\n");

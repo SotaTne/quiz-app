@@ -4,6 +4,7 @@ import type { Question } from "../domain/question.ts";
 import { accuracyColor } from "./accuracy-color.ts";
 import { FlashcardView } from "./flashcard-view.tsx";
 import { FourChoiceView } from "./four-choice-view.tsx";
+import { QuizText } from "./quiz-text.tsx";
 
 export type PracticeViewProps = {
   mode: Mode;
@@ -91,11 +92,17 @@ export function PracticeView({
         <Card withBorder radius="md" padding="xl">
           <Stack gap="sm" align="center">
             <Text size="lg" fw={600} c={result.isCorrect ? "green" : "red"}>
-              {result.isCorrect ? "正解!" : `不正解。正しい答え: ${question.answer}`}
+              {result.isCorrect ? (
+                "正解!"
+              ) : (
+                <>
+                  不正解。正しい答え: <QuizText text={question.answer} />
+                </>
+              )}
             </Text>
             {question.explanation && (
               <Text size="sm" c="dimmed" ta="center">
-                {question.explanation}
+                <QuizText text={question.explanation} />
               </Text>
             )}
             <Button onClick={onNext}>次の問題へ</Button>
