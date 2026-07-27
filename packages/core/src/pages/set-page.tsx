@@ -1,6 +1,7 @@
 import { Stack, Text } from "@mantine/core";
 import type { SetData } from "./load-set-data.ts";
 import { LoginButton } from "./login-button.tsx";
+import { AppNavigation } from "./app-navigation.tsx";
 import { QuizSession } from "./quiz-session.tsx";
 
 export type SetPageProps = {
@@ -23,14 +24,17 @@ export function SetPage({ data }: SetPageProps) {
   }
 
   return (
-    <QuizSession
-      userId={data.userId}
-      set={data.set}
-      allSets={data.allSets}
-      quizAttempts={data.quizAttempts}
-      flashcardAttempts={data.flashcardAttempts}
-      quizAccuracy={data.quizAccuracy}
-      flashcardAccuracy={data.flashcardAccuracy}
-    />
+    <Stack gap="lg">
+      <AppNavigation active="quiz" />
+      <QuizSession
+        userId={data.userId}
+        set={data.set}
+        allSets={data.allSets}
+        quizAttempts={data.quizAttempts}
+        flashcardAttempts={data.flashcardAttempts}
+        quizAccuracy={data.quizAccuracy}
+        flashcardAccuracy={data.flashcardAccuracy}
+      />
+    </Stack>
   );
 }

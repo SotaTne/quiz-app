@@ -4,3 +4,10 @@ declare module "virtual:quiz-content" {
   const questionSets: QuestionSet[];
   export default questionSets;
 }
+
+declare module "virtual:paper-content" {
+  import type { Paper } from "@quiz/core";
+
+  const papers: Paper[];
+  export default papers;
+}

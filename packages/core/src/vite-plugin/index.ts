@@ -1,10 +1,18 @@
 import { loadQuestionSets } from "../content/load-question-sets.ts";
+import { loadPapers } from "../content/load-papers.ts";
 
 const VIRTUAL_MODULE_ID = "virtual:quiz-content";
 const RESOLVED_VIRTUAL_MODULE_ID = `\0${VIRTUAL_MODULE_ID}`;
+const PAPER_VIRTUAL_MODULE_ID = "virtual:paper-content";
+const RESOLVED_PAPER_VIRTUAL_MODULE_ID = `\0${PAPER_VIRTUAL_MODULE_ID}`;
 
 export type QuizContentPluginOptions = {
   /** `content/questions`のような、問題MDファイルが置かれたディレクトリ */
+  contentDir: string;
+};
+
+export type PaperContentPluginOptions = {
+  /** `content/paper`のような、カンペのMarkdown/mmdファイルが置かれたディレクトリ */
   contentDir: string;
 };
 
@@ -30,7 +38,7 @@ export type QuizContentVitePlugin = {
   configureServer(server: DevServer): void;
 };
 
-function generateModuleCode(contentDir: string): string {
+function generateQuizModuleCode(contentDir: string): string {
   const result = loadQuestionSets(contentDir);
   if (!result.ok) {
     throw new Error(`問題データの検証に失敗しました:\n${result.errors.join("\n")}`);
@@ -38,33 +46,63 @@ function generateModuleCode(contentDir: string): string {
   return `export default ${JSON.stringify(result.data)};`;
 }
 
-/**
- * `content/questions/**​/*.md`を`virtual:quiz-content`という仮想モジュールにする。
- * `import questionSets from "virtual:quiz-content"`でwaku側から`QuestionSet[]`を取得できる。
- */
-export function quizContentPlugin(options: QuizContentPluginOptions): QuizContentVitePlugin {
-  const { contentDir } = options;
+function generatePaperModuleCode(contentDir: string): string {
+  const result = loadPapers(contentDir);
+  if (!result.ok) {
+    throw new Error(`カンペデータの検証に失敗しました:\n${result.errors.join("\n")}`);
+  }
+  return `export default ${JSON.stringify(result.data)};`;
+}
 
+function contentPlugin(input: {
+  name: string;
+  contentDir: string;
+  virtualModuleId: string;
+  resolvedVirtualModuleId: string;
+  generateModuleCode: (contentDir: string) => string;
+}): QuizContentVitePlugin {
   return {
-    name: "quiz-content",
-
+    name: input.name,
     resolveId(id) {
-      if (id === VIRTUAL_MODULE_ID) return RESOLVED_VIRTUAL_MODULE_ID;
+      if (id === input.virtualModuleId) return input.resolvedVirtualModuleId;
     },
-
     load(id) {
-      if (id === RESOLVED_VIRTUAL_MODULE_ID) return generateModuleCode(contentDir);
+      if (id === input.resolvedVirtualModuleId) return input.generateModuleCode(input.contentDir);
     },
-
     configureServer(server) {
-      server.watcher.add(contentDir);
+      server.watcher.add(input.contentDir);
       server.watcher.on("all", (_event, filePath) => {
-        if (!filePath.endsWith(".md")) return;
-        const module = server.moduleGraph.getModuleById(RESOLVED_VIRTUAL_MODULE_ID);
+        if (!filePath.endsWith(".md") && !filePath.endsWith(".mmd")) return;
+        const module = server.moduleGraph.getModuleById(input.resolvedVirtualModuleId);
         if (!module) return;
         server.moduleGraph.invalidateModule(module);
         server.ws.send({ type: "full-reload" });
       });
     },
   };
+}
+
+/**
+ * `content/questions/**​/*.md`を`virtual:quiz-content`という仮想モジュールにする。
+ * `import questionSets from "virtual:quiz-content"`でwaku側から`QuestionSet[]`を取得できる。
+ */
+export function quizContentPlugin(options: QuizContentPluginOptions): QuizContentVitePlugin {
+  return contentPlugin({
+    name: "quiz-content",
+    contentDir: options.contentDir,
+    virtualModuleId: VIRTUAL_MODULE_ID,
+    resolvedVirtualModuleId: RESOLVED_VIRTUAL_MODULE_ID,
+    generateModuleCode: generateQuizModuleCode,
+  });
+}
+
+/** `content/paper/**​/*.{md,mmd}`を`virtual:paper-content`として公開する。 */
+export function paperContentPlugin(options: PaperContentPluginOptions): QuizContentVitePlugin {
+  return contentPlugin({
+    name: "paper-content",
+    contentDir: options.contentDir,
+    virtualModuleId: PAPER_VIRTUAL_MODULE_ID,
+    resolvedVirtualModuleId: RESOLVED_PAPER_VIRTUAL_MODULE_ID,
+    generateModuleCode: generatePaperModuleCode,
+  });
 }
